@@ -44,6 +44,34 @@ export function EpisodeDataPanel({ data, episodeTime }: Props) {
     return { actionRow: a, stateRow: s, ranges: r };
   }, [data, frameIndex]);
 
+  const CHART_W = 120;
+  const CHART_H = 28;
+
+  const paths = useMemo(() => {
+    if (!data) return [] as Array<{ action: string; state: string }>;
+    const N = data.length_frames;
+    if (N < 2) return data.joint_names.map(() => ({ action: "", state: "" }));
+    return data.joint_names.map((_, j) => {
+      const [lo, hi] = ranges[j];
+      const span = hi - lo || 1;
+      const action: string[] = [];
+      const state: string[] = [];
+      for (let i = 0; i < N; i++) {
+        const x = ((i / (N - 1)) * CHART_W).toFixed(1);
+        const yA = (CHART_H - ((data.action[i][j] - lo) / span) * CHART_H).toFixed(1);
+        const yS = (CHART_H - ((data.state[i][j] - lo) / span) * CHART_H).toFixed(1);
+        action.push(`${i === 0 ? "M" : "L"} ${x} ${yA}`);
+        state.push(`${i === 0 ? "M" : "L"} ${x} ${yS}`);
+      }
+      return { action: action.join(" "), state: state.join(" ") };
+    });
+  }, [data, ranges]);
+
+  const cursorX = useMemo(() => {
+    if (!data || data.length_frames < 2) return 0;
+    return (frameIndex / (data.length_frames - 1)) * CHART_W;
+  }, [data, frameIndex]);
+
   if (!data) {
     return (
       <article className="rounded-xl bg-panel border border-slate-800 p-4">
@@ -68,10 +96,7 @@ export function EpisodeDataPanel({ data, episodeTime }: Props) {
         {data.joint_names.map((name, j) => {
           const a = actionRow[j] ?? 0;
           const s = stateRow[j] ?? 0;
-          const [lo, hi] = ranges[j];
-          const span = hi - lo;
-          const aFrac = span === 0 ? 0.5 : (a - lo) / span;
-          const sFrac = span === 0 ? 0.5 : (s - lo) / span;
+          const p = paths[j] ?? { action: "", state: "" };
 
           return (
             <div key={name}>
@@ -82,23 +107,43 @@ export function EpisodeDataPanel({ data, episodeTime }: Props) {
                   <span className="text-ok">s={s.toFixed(2)}</span>
                 </span>
               </div>
-              <div className="relative h-3 rounded-sm bg-slate-900 border border-slate-800 overflow-hidden">
-                <div
-                  className="absolute top-0 bottom-0 bg-accent/60"
-                  style={{ left: 0, width: `${Math.round(aFrac * 100)}%` }}
+              <svg
+                viewBox={`0 0 ${CHART_W} ${CHART_H}`}
+                preserveAspectRatio="none"
+                className="block w-full h-7 rounded-sm bg-slate-900 border border-slate-800"
+              >
+                <path
+                  d={p.state}
+                  stroke="#34d399"
+                  strokeWidth={1}
+                  strokeDasharray="3 3"
+                  fill="none"
+                  vectorEffect="non-scaling-stroke"
                 />
-                <div
-                  className="absolute top-0 bottom-0 w-[2px] bg-ok"
-                  style={{ left: `${Math.round(sFrac * 100)}%` }}
+                <path
+                  d={p.action}
+                  stroke="#22d3ee"
+                  strokeWidth={1.5}
+                  fill="none"
+                  vectorEffect="non-scaling-stroke"
                 />
-              </div>
+                <line
+                  x1={cursorX}
+                  x2={cursorX}
+                  y1={0}
+                  y2={CHART_H}
+                  stroke="#94a3b8"
+                  strokeWidth={1}
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
             </div>
           );
         })}
       </div>
 
       <p className="mt-3 text-[10px] text-slate-500 font-mono">
-        bar = action target · vertical tick = observation.state
+        solid line = action · dashed line = observation.state · vertical = current frame
       </p>
     </article>
   );

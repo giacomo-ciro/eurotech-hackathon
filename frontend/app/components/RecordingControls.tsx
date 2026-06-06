@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RERUN_URL, lerobotVideoUrl } from "../lib/api";
 import type {
   LeRobotEpisodeData,
@@ -247,6 +247,7 @@ function RecordedView({
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const advancingRef = useRef(false);
+  const [currentFrame, setCurrentFrame] = useState(0);
 
   // When episodeData changes, seek to its start; autoplay if requested.
   useEffect(() => {
@@ -255,6 +256,7 @@ function RecordedView({
     advancingRef.current = false;
     el.currentTime = episodeData.video_from_s;
     onPlaybackTime(0);
+    setCurrentFrame(0);
     if (autoplay) {
       el.play().catch(() => {
         // Browsers reject programmatic play() during reloads or before user
@@ -284,9 +286,16 @@ function RecordedView({
         if (t < episodeData.video_from_s) {
           el.currentTime = episodeData.video_from_s;
           onPlaybackTime(0);
+          setCurrentFrame(0);
           return;
         }
-        onPlaybackTime(t - episodeData.video_from_s);
+        const localT = t - episodeData.video_from_s;
+        onPlaybackTime(localT);
+        const frame = Math.min(
+          Math.max(0, Math.floor(localT * episodeData.fps)),
+          episodeData.length_frames - 1,
+        );
+        setCurrentFrame(frame);
       } else {
         onPlaybackTime(t);
       }
@@ -364,6 +373,11 @@ function RecordedView({
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm">
             Pick an episode to play.
+          </div>
+        )}
+        {episodeData && (
+          <div className="absolute top-2 right-2 rounded-md bg-black/60 backdrop-blur-sm px-2 py-1 text-[11px] font-mono text-slate-200 pointer-events-none border border-white/10">
+            ep {String(episodeData.episode_index).padStart(2, "0")} · {episodeData.task} · frame {currentFrame}/{episodeData.length_frames - 1}
           </div>
         )}
       </div>
