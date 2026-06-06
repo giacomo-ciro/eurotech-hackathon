@@ -143,4 +143,4 @@ That makes the project look less like a prompt trick and more like an implementa
 [14]: https://amdl.com.hk/?utm_source=chatgpt.com "Home | Asia Molecular Diagnostics Laboratory Limited (AMDL ..."
 [15]: https://chlab.com.hk/en/profile/main/?utm_source=chatgpt.com "Chan & Hou Medical Laboratories Ltd."
 [16]: https://gleneagles.hk/about/hospital-introduction?utm_source=chatgpt.com "Gleneagles Hospital Hong Kong"
-[17]: https://opentrons.com/robots/flex?utm_source=chatgpt.com "Flex | The next generation of lab automation is here - Opentrons.com"
+[17]: https://opentrons.com/robots/flex?utm_source=chatgpt.com "Flex | The next generation of lab automation is here - Opentrons.com
