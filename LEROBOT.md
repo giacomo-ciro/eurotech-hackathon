@@ -90,8 +90,10 @@ lerobot-teleoperate \
   --robot.type=so101_follower \
   --robot.port=/dev/tty.usbmodem5A680099311 \
   --robot.id=Follower \
-  --robot.cameras="{wrist_cam: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25}, laptop_cam: {type: opencv, index_or_path: 1, width: 1920, height: 1080, fps: 15}}" \
+  --robot.cameras="{wrist_cam: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25}}" \
   --display_data=True
+
+# laptop_cam: {type: opencv, index_or_path: 1, width: 1920, height: 1080, fps: 15}
 ```
 
 # Record
