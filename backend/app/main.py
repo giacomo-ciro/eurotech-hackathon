@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import config
-from .routes import captions, chat, datasets, robot_ws, sessions
+from .routes import captions, chat, datasets, lerobot, robot_ws, sessions
 from .services.data_store import get_store
 from .services.robot_proxy import get_robot_proxy
 
@@ -37,6 +37,7 @@ app.include_router(datasets.router)
 app.include_router(sessions.router)
 app.include_router(captions.router)
 app.include_router(chat.router)
+app.include_router(lerobot.router)
 app.include_router(robot_ws.router)
 
 

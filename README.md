@@ -58,6 +58,12 @@ Open <http://localhost:3000>.
 - Click **Start recording** on `/` to animate the 4-stage timeline and start the Claude caption SSE.
 - Visit `/datasets/medical-vacutainer-v1` and pick an episode — the joint timeseries and frame captions stay in sync with the video scrubber.
 
+## Recorded mode (LeRobot v3 dataset)
+
+The Collection page's video pane has a **Live / Recorded** toggle. Live mode shows the rerun iframe (unchanged). Recorded mode reads a real LeRobot v3 dataset at `data/data/` (so100 follower, 41 episodes, 11,224 frames @ 30 fps, AV1 wrist-cam clips), exposes an episode dropdown, and plays only the time-slice of the underlying `.mp4` that belongs to the selected episode. The right pane swaps to a frame-data inspector showing each joint's action target vs observation.state, indexed by `currentTime * fps`.
+
+The wrist-cam video is AV1 — works in **Chrome / Edge / Firefox**; Safari shows a blank player but the rest of the panel still renders.
+
 ---
 
 > Hardware setup for the SO-101 arms lives in [`README.robotum.md`](README.robotum.md) (the upstream EuroTech tutorial).

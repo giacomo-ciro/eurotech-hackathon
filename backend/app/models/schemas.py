@@ -81,3 +81,32 @@ class ChatRequest(BaseModel):
 
 class CaptionStreamRequest(BaseModel):
     session_id: str
+
+
+class LeRobotInfo(BaseModel):
+    robot_type: str
+    fps: int
+    joint_names: list[str]
+    total_episodes: int
+    total_frames: int
+    tasks: list[str]
+    video_key: str
+
+
+class LeRobotEpisodeSummary(BaseModel):
+    episode_index: int
+    task: str
+    length_frames: int
+    duration_s: float
+
+
+class LeRobotEpisodeData(BaseModel):
+    episode_index: int
+    task: str
+    length_frames: int
+    fps: int
+    joint_names: list[str]
+    video_from_s: float
+    video_to_s: float
+    action: list[list[float]]
+    state: list[list[float]]
