@@ -86,3 +86,34 @@ export type LiveCaption = {
   t: number;
   text: string;
 };
+
+export type VideoMode = "live" | "recorded";
+
+export type LeRobotInfo = {
+  robot_type: string;
+  fps: number;
+  joint_names: string[];
+  total_episodes: number;
+  total_frames: number;
+  tasks: string[];
+  video_key: string;
+};
+
+export type LeRobotEpisodeSummary = {
+  episode_index: number;
+  task: string;
+  length_frames: number;
+  duration_s: number;
+};
+
+export type LeRobotEpisodeData = {
+  episode_index: number;
+  task: string;
+  length_frames: number;
+  fps: number;
+  joint_names: string[];
+  video_from_s: number;
+  video_to_s: number;
+  action: number[][];
+  state: number[][];
+};

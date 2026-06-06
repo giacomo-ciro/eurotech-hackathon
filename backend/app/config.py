@@ -14,6 +14,7 @@ def _resolve_data_dir() -> Path:
 DATA_DIR: Path = _resolve_data_dir()
 DATASETS_DIR = DATA_DIR / "datasets"
 ACTIVE_SESSION_JSON = DATA_DIR / "active_session.json"
+LEROBOT_DATASET_DIR = Path(os.environ.get("LEROBOT_DATASET_DIR") or (DATA_DIR / "data"))
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")

@@ -3,6 +3,9 @@ import type {
   Dataset,
   DatasetDetail,
   Episode,
+  LeRobotEpisodeData,
+  LeRobotEpisodeSummary,
+  LeRobotInfo,
   Session,
 } from "./types";
 
@@ -58,6 +61,22 @@ export function datasetCoverUrl(id: string): string {
 
 export function captionStreamUrl(sessionId: string): string {
   return `${API_BASE}/api/sessions/${sessionId}/captions/stream`;
+}
+
+export function getLeRobotInfo(): Promise<LeRobotInfo> {
+  return getJSON<LeRobotInfo>("/api/lerobot/info");
+}
+
+export function getLeRobotEpisodes(): Promise<LeRobotEpisodeSummary[]> {
+  return getJSON<LeRobotEpisodeSummary[]>("/api/lerobot/episodes");
+}
+
+export function getLeRobotEpisode(episodeIndex: number): Promise<LeRobotEpisodeData> {
+  return getJSON<LeRobotEpisodeData>(`/api/lerobot/episodes/${episodeIndex}`);
+}
+
+export function lerobotVideoUrl(episodeIndex: number): string {
+  return `${API_BASE}/api/lerobot/episodes/${episodeIndex}/video`;
 }
 
 export function robotSocketUrl(): string {
