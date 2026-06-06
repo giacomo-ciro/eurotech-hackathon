@@ -14,7 +14,7 @@ import subprocess
 import sys
 
 DATASET_REPO_ID = "giacomo-ciro/cube-color-pointing"
-DATASET_ROOT = "data"
+DATASET_ROOT = "data/data"
 OUTPUT_DIR = "outputs/train/act_blue"
 
 STEPS = 10_000
@@ -22,20 +22,21 @@ BATCH_SIZE = 8
 SAVE_FREQ = 2_000
 LOG_FREQ = 100
 
+INPUT_FEATURES = (
+    '{"observation.images.wrist_cam":{"type":"VISUAL","shape":[480,640,3]},'
+    '"observation.state":{"type":"STATE","shape":[6]}}'
+)
+OUTPUT_FEATURES = '{"action":{"type":"ACTION","shape":[6]}}'
+
 cmd = [
     "lerobot-train",
     f"--dataset.repo_id={DATASET_REPO_ID}",
     f"--dataset.root={DATASET_ROOT}",
+    "--dataset.video_backend=pyav",
     "--policy.type=act",
-    # Match dataset camera key
-    "--policy.input_features.observation.images.wrist_cam.type=VISUAL",
-    "--policy.input_features.observation.images.wrist_cam.shape=[480,640,3]",
-    # Proprioceptive state
-    "--policy.input_features.observation.state.type=STATE",
-    "--policy.input_features.observation.state.shape=[6]",
-    # Action output
-    "--policy.output_features.action.type=ACTION",
-    "--policy.output_features.action.shape=[6]",
+    f"--policy.input_features={INPUT_FEATURES}",
+    f"--policy.output_features={OUTPUT_FEATURES}",
+    "--policy.push_to_hub=false",
     f"--steps={STEPS}",
     f"--batch_size={BATCH_SIZE}",
     f"--save_freq={SAVE_FREQ}",
