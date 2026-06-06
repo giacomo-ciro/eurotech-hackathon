@@ -1,0 +1,22 @@
+[project]
+name = "dispensr-robot-bridge"
+version = "0.1.0"
+description = "Host-side LeRobot/SO-101 bridge for the Dispensr platform"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.8",
+    "pyyaml>=6.0",
+]
+# LeRobot is intentionally NOT listed here. The root pyproject already pins
+# lerobot[aloha,pusht,feetech]; install both projects into the same venv to use
+# the real arm. Without lerobot installed, the bridge falls back to the mock
+# motion runner.
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app"]

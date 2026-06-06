@@ -1,0 +1,38 @@
+[
+  {
+    "id": "RX-1001",
+    "patient_id": "HK-0009",
+    "drug_id": 5,
+    "tray": "morning",
+    "quantity": 1,
+    "instructions": "Take 1 capsule 30 minutes before breakfast.",
+    "prescriber": "Dr. Leung, Sham Shui Po Clinic"
+  },
+  {
+    "id": "RX-1002",
+    "patient_id": "HK-0014",
+    "drug_id": 8,
+    "tray": "dinner",
+    "quantity": 1,
+    "instructions": "Take 1 tablet with the evening meal.",
+    "prescriber": "Dr. Cheung, Queen Mary Hospital"
+  },
+  {
+    "id": "RX-1003",
+    "patient_id": "HK-0021",
+    "drug_id": 3,
+    "tray": "morning",
+    "quantity": 1,
+    "instructions": "Take 1 tablet daily, same time each morning.",
+    "prescriber": "Dr. Wong, Central Clinic"
+  },
+  {
+    "id": "RX-1004",
+    "patient_id": "HK-0009",
+    "drug_id": 1,
+    "tray": "review",
+    "quantity": 1,
+    "instructions": "Pharmacist review required: patient on multiple medications.",
+    "prescriber": "Dr. Leung, Sham Shui Po Clinic"
+  }
+]
