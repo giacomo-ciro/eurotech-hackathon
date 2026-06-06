@@ -6,12 +6,13 @@ import type { TimeseriesPoint } from "../lib/types";
 type Props = {
   points: TimeseriesPoint[];
   currentTime: number;
+  jointUnits?: string;
 };
 
 const JOINT_COLORS = ["#22d3ee", "#a78bfa", "#34d399", "#fbbf24", "#f87171", "#60a5fa"];
 const GRIPPER_COLOR = "#e5e7eb";
 
-export function TimeseriesChart({ points, currentTime }: Props) {
+export function TimeseriesChart({ points, currentTime, jointUnits = "units" }: Props) {
   const { width, height, padX, padY, paths, gripperPath, tMin, tMax } = useMemo(() => {
     const w = 520;
     const h = 220;
@@ -86,7 +87,7 @@ export function TimeseriesChart({ points, currentTime }: Props) {
           <line x1={cursorX} x2={cursorX} y1={padY} y2={height - padY} stroke="#22d3ee" strokeWidth={1} />
         )}
         <text x={padX} y={padY - 4} fontSize={10} fill="#64748b" fontFamily="ui-monospace, monospace">
-          joints (rad)
+          joints ({jointUnits})
         </text>
       </svg>
       <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono">

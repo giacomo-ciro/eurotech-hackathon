@@ -1,0 +1,33 @@
+defaults:
+  - _self_
+  - user: gciro   # user-specific overrides (see configs/user/)
+
+robot:
+  cam_width: 640   # camera resolution in pixels
+  cam_height: 480
+  fps: 25          # capture/control loop frequency
+
+dataset:
+  repo_id: giacomo-ciro/cube-color-pointing   # HuggingFace dataset id
+  root: data/dataset                          # local storage path
+  tasks:
+    - "pick up the cube"   # natural-language task description(s) fed to the policy
+  num_episodes: 10         # episodes to record per data collection run (effective episodes per task is num_episodes/num_tasks)
+  push_to_hub: false       # upload dataset to HuggingFace Hub after recording
+  overwrite: true          # overwrite existing local dataset if present
+
+train:
+  steps: 10000       # total gradient update steps
+  batch_size: 8
+  save_freq: 2000    # save checkpoint every N steps
+  log_freq: 100      # log metrics every N steps
+  output_dir: outputs/train/act
+  policy_type: act   # "act" or "smolvla"
+
+deploy:
+  pretrained_path: checkpoints/pretrained_model   # checkpoint to load for inference
+  device: mps                                      # torch device (mps | cuda | cpu)
+  policy_type: act   # "act" or "smolvla"
+  tasks:
+    - "pick up the cube"   # task prompt(s) passed to the policy at runtime
+  n_steps: 500             # control steps per episode before policy.reset()

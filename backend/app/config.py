@@ -21,5 +21,15 @@ ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
 ROBOT_BRIDGE_URL = os.environ.get("ROBOT_BRIDGE_URL", "ws://localhost:8001/ws")
 ROBOT_BRIDGE_HTTP = os.environ.get("ROBOT_BRIDGE_HTTP", "http://localhost:8001")
 CORS_ORIGINS = os.environ.get(
-    "CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
+    "CORS_ORIGINS",
+    ",".join(
+        [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3001",
+            "http://localhost:3002",
+            "http://127.0.0.1:3002",
+        ]
+    ),
 ).split(",")
