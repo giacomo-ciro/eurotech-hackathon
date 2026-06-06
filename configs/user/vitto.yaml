@@ -1,0 +1,10 @@
+# @package _global_
+robot:
+  follower_port: /dev/tty.usbmodem5A680099311
+  leader_port:   /dev/tty.usbmodem5A680094911
+  cam_index: 1
+  cam_width: 640
+  cam_height: 480
+  cam2_index: 2
+  cam2_width: 640
+  cam2_height: 360

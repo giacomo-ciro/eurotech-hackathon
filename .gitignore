@@ -1,7 +1,8 @@
 data/
 outputs/
 uv.lock
-checkpoints 
+checkpoints/
+*.tar.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
