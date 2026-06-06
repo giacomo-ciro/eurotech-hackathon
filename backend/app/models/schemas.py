@@ -41,11 +41,16 @@ class EpisodeSummary(BaseModel):
     duration_s: float
     frame_count: int
     thumbnail: str = ""
+    task: str = ""
+    video_start_s: float = 0.0
+    video_end_s: float = 0.0
 
 
 class Episode(EpisodeSummary):
     captions: list[Caption] = []
     timeseries: list[TimeseriesPoint] = []
+    joint_names: list[str] = []
+    joint_units: str = "degrees"
 
 
 class Dataset(BaseModel):

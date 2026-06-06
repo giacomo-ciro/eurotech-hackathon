@@ -40,6 +40,9 @@ export type EpisodeSummary = {
   duration_s: number;
   frame_count: number;
   thumbnail: string;
+  task: string;
+  video_start_s: number;
+  video_end_s: number;
 };
 
 export type Caption = {
@@ -59,6 +62,8 @@ export type TimeseriesPoint = {
 export type Episode = EpisodeSummary & {
   captions: Caption[];
   timeseries: TimeseriesPoint[];
+  joint_names: string[];
+  joint_units: string;
 };
 
 export type DatasetDetail = Dataset & { episodes: EpisodeSummary[] };

@@ -11,5 +11,6 @@ dependencies = [
     "websockets>=13",
     "pydantic>=2.8",
     "pandas>=2.2",
+    "pyarrow>=16",
     "python-multipart>=0.0.9",
 ]
