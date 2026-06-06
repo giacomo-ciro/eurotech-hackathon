@@ -4,7 +4,7 @@ import json
 import logging
 from typing import AsyncIterator
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 from ..models.schemas import ChatRequest
@@ -12,7 +12,7 @@ from ..services.claude_client import get_claude_client
 from ..services.data_store import get_store
 
 
-log = logging.getLogger("dispensr.chat")
+log = logging.getLogger("vla.chat")
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
@@ -23,17 +23,20 @@ def _sse(event: str, data: dict[str, object]) -> bytes:
 @router.post("")
 async def chat(request: ChatRequest) -> StreamingResponse:
     store = get_store()
-    medicine = store.medicine(request.drug_id)
-    if medicine is None:
-        raise HTTPException(status_code=404, detail=f"Drug {request.drug_id} not found")
-    interactions = store.interactions_for(request.drug_id)
 
-    active = store.active()
-    patient = None
-    if active is not None:
-        prescription = store.prescription(active.prescription_id)
-        if prescription is not None and prescription.drug_id == request.drug_id:
-            patient = store.patient(prescription.patient_id)
+    session = None
+    dataset = None
+    episode = None
+
+    if request.session_id:
+        candidate = store.active_session()
+        if candidate is not None and candidate.id == request.session_id:
+            session = candidate
+            dataset = store.dataset(session.dataset_id)
+    if request.dataset_id:
+        dataset = store.dataset(request.dataset_id) or dataset
+    if request.dataset_id and request.episode_id:
+        episode = store.episode(request.dataset_id, request.episode_id)
 
     client = get_claude_client()
 
@@ -41,12 +44,16 @@ async def chat(request: ChatRequest) -> StreamingResponse:
         try:
             yield _sse(
                 "meta",
-                {"drug_id": medicine.drug_id, "drug_name": medicine.drug_name},
+                {
+                    "session_id": session.id if session else None,
+                    "dataset_id": dataset.id if dataset else None,
+                    "episode_id": episode.id if episode else None,
+                },
             )
-            async for chunk in client.stream_reply(
-                medicine=medicine,
-                interactions=interactions,
-                patient=patient,
+            async for chunk in client.stream_chat(
+                session=session,
+                dataset=dataset,
+                episode=episode,
                 messages=request.messages,
             ):
                 yield _sse("token", {"text": chunk})

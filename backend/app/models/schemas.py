@@ -5,74 +5,66 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 
-class Patient(BaseModel):
+SessionState = Literal["idle", "recording", "captioning", "saved", "error"]
+AugmentationStatus = Literal["raw", "augmented", "fine-tuned"]
+
+
+class Session(BaseModel):
+    id: str
+    task: str
+    robot: str
+    operator: str
+    dataset_id: str
+    state: SessionState = "idle"
+    started_at: str = ""
+    episode_count: int = 0
+
+
+class Caption(BaseModel):
+    t_start: float
+    t_end: float
+    text: str
+    confidence: float = 0.0
+
+
+class TimeseriesPoint(BaseModel):
+    t: float
+    joints: list[float] = Field(default_factory=list, description="6 joint values for SO-101")
+    gripper: float = 0.0
+    ee_xyz: tuple[float, float, float] = (0.0, 0.0, 0.0)
+
+
+class EpisodeSummary(BaseModel):
+    id: str
+    dataset_id: str
+    title: str
+    duration_s: float
+    frame_count: int
+    thumbnail: str = ""
+
+
+class Episode(EpisodeSummary):
+    captions: list[Caption] = []
+    timeseries: list[TimeseriesPoint] = []
+
+
+class Dataset(BaseModel):
     id: str
     name: str
-    name_zh: Optional[str] = None
-    age: int
-    sex: str
-    language: str
-    languages: list[str]
-    allergies: list[str]
-    notes: str = ""
-
-
-class Medicine(BaseModel):
-    drug_id: int
-    drug_name: str
-    generic_name: str
-    drug_class: str
-    indications: str
-    dosage_form: str
-    strength: str
-    route_of_administration: str
-    mechanism_of_action: str
-    side_effects: str
-    contraindications: str
-    interactions_text: str = Field(
-        default="",
-        description="Free-text interaction column from the source catalog.",
-    )
-    warnings_and_precautions: str
-    pregnancy_category: str
-    storage_conditions: str
-    manufacturer: str
-    approval_date: str
-    availability: str
-    ndc: str
-    price: str
-
-
-class Interaction(BaseModel):
-    drug_1: str
-    drug_2: str
     description: str
-    source: Literal["common", "exhaustive"] = "common"
-
-
-class Prescription(BaseModel):
-    id: str
-    patient_id: str
-    drug_id: int
-    tray: Literal["morning", "lunch", "dinner", "review"]
-    quantity: int = 1
-    instructions: str = ""
-    prescriber: str = ""
-
-
-class ActivePrescription(BaseModel):
-    prescription_id: str
-    stage: Literal["idle", "scanning", "identified", "picking", "placed", "done", "error"] = "idle"
-    vision_confidence: float = 0.0
-    match: bool = False
+    domain: str
+    robot: str
+    episode_count: int
+    frame_count: int
+    augmentation_status: AugmentationStatus
+    size_mb: float
+    price_usd: float
+    cover_image: str = ""
     updated_at: str = ""
 
 
-class ActivePrescriptionDetail(BaseModel):
-    active: ActivePrescription
-    prescription: Prescription
-    patient: Patient
-    medicine: Medicine
+class DatasetDetail(Dataset):
+    episodes: list[EpisodeSummary] = []
 
 
 class ChatMessage(BaseModel):
@@ -81,11 +73,11 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    drug_id: int
     messages: list[ChatMessage]
+    session_id: Optional[str] = None
+    dataset_id: Optional[str] = None
+    episode_id: Optional[str] = None
 
 
-class RobotStateEvent(BaseModel):
-    stage: str
-    detail: str = ""
-    progress: float = 0.0
+class CaptionStreamRequest(BaseModel):
+    session_id: str
