@@ -125,20 +125,22 @@ export default function DatasetDetailPage({ params }: Props) {
 
         {!episode && episodeId && <p className="text-slate-500 text-sm">Loading trajectory…</p>}
         {episode && (
-          <>
-            <DigitalTwinViewer
-              points={episode.timeseries}
-              currentTime={currentTime}
-              task={episode.task}
-              jointUnits={episode.joint_units}
-              heightClassName="h-[420px] md:h-[520px] xl:h-[620px]"
-            />
-            <TrajectoryPlaybackControls
-              points={episode.timeseries}
-              currentTime={currentTime}
-              onTimeChange={setCurrentTime}
-            />
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-4 items-start">
+            <div className="space-y-4 min-w-0">
+              <DigitalTwinViewer
+                points={episode.timeseries}
+                currentTime={currentTime}
+                task={episode.task}
+                jointUnits={episode.joint_units}
+                heightClassName="h-[420px] md:h-[560px] xl:h-[680px]"
+              />
+              <TrajectoryPlaybackControls
+                points={episode.timeseries}
+                currentTime={currentTime}
+                onTimeChange={setCurrentTime}
+              />
+            </div>
+            <div className="space-y-4 min-w-0 xl:pt-7">
               <TimeseriesChart
                 points={episode.timeseries}
                 currentTime={currentTime}
@@ -148,7 +150,7 @@ export default function DatasetDetailPage({ params }: Props) {
                 <CaptionTrack captions={episode.captions} currentTime={currentTime} />
               )}
             </div>
-          </>
+          </div>
         )}
       </section>
     </main>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { TimeseriesPoint } from "../lib/types";
 
 type Props = {
@@ -16,6 +17,7 @@ type TwinHandles = {
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
   camera: THREE.OrthographicCamera;
+  controls: OrbitControls;
   root: THREE.Group;
   pan: THREE.Group;
   shoulder: THREE.Group;
@@ -24,7 +26,6 @@ type TwinHandles = {
   wristRoll: THREE.Group;
   leftFinger: THREE.Mesh;
   rightFinger: THREE.Mesh;
-  activeTube: THREE.Mesh;
   frameId: number;
   resizeObserver: ResizeObserver;
 };
@@ -35,6 +36,10 @@ const LINK_LENGTHS = {
   wrist: 0.1,
   tool: 0.07,
 };
+const VIEW_TARGET = new THREE.Vector3(0.18, 0.09, 0);
+const CAMERA_OFFSET = new THREE.Vector3(0.62, 0.42, 0.66);
+const MIN_VIEW_WIDTH = 0.86;
+const MIN_VIEW_HEIGHT = 0.58;
 
 function degToRad(value: number): number {
   return (value * Math.PI) / 180;
@@ -98,20 +103,50 @@ function addLink(parent: THREE.Group, length: number, color: number): THREE.Grou
   return next;
 }
 
-function buildScene(mount: HTMLDivElement, task: string | undefined): TwinHandles {
+function resetCamera(camera: THREE.OrthographicCamera, controls: OrbitControls) {
+  camera.position.copy(VIEW_TARGET).add(CAMERA_OFFSET);
+  camera.zoom = 1;
+  camera.lookAt(VIEW_TARGET);
+  controls.target.copy(VIEW_TARGET);
+  controls.update();
+}
+
+function buildScene(mount: HTMLDivElement): TwinHandles {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0b1220);
 
-  const cameraTarget = new THREE.Vector3(0.18, 0.04, 0);
   const camera = new THREE.OrthographicCamera(-0.48, 0.48, 0.36, -0.36, 0.01, 10);
-  camera.position.set(0.62, 0.42, 0.66);
-  camera.lookAt(cameraTarget);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.domElement.style.cursor = "grab";
+  renderer.domElement.style.touchAction = "none";
   mount.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.enablePan = false;
+  controls.minZoom = 0.25;
+  controls.maxZoom = 3.5;
+  controls.mouseButtons = {
+    LEFT: THREE.MOUSE.ROTATE,
+    MIDDLE: THREE.MOUSE.DOLLY,
+    RIGHT: THREE.MOUSE.ROTATE,
+  };
+  controls.touches = {
+    ONE: THREE.TOUCH.ROTATE,
+    TWO: THREE.TOUCH.DOLLY_ROTATE,
+  };
+  controls.addEventListener("start", () => {
+    renderer.domElement.style.cursor = "grabbing";
+  });
+  controls.addEventListener("end", () => {
+    renderer.domElement.style.cursor = "grab";
+  });
+  resetCamera(camera, controls);
 
   const ambient = new THREE.AmbientLight(0xffffff, 0.58);
   scene.add(ambient);
@@ -133,33 +168,6 @@ function buildScene(mount: HTMLDivElement, task: string | undefined): TwinHandle
   base.castShadow = true;
   base.receiveShadow = true;
   scene.add(base);
-
-  const rack = new THREE.Group();
-  rack.position.set(0.32, 0.018, -0.12);
-  rack.add(makeBox([0.18, 0.032, 0.08], 0x334155, [0, 0, 0]));
-  for (let i = 0; i < 4; i += 1) {
-    rack.add(makeBox([0.026, 0.012, 0.058], 0x0f172a, [-0.06 + i * 0.04, 0.023, 0]));
-  }
-  scene.add(rack);
-
-  const activeColor = task?.toLowerCase().includes("yellow") ? 0xfbbf24 : 0x22d3ee;
-  const activeTube = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.012, 0.012, 0.09, 24),
-    new THREE.MeshStandardMaterial({ color: activeColor, roughness: 0.3, metalness: 0.05 }),
-  );
-  activeTube.position.set(0.24, 0.07, -0.12);
-  activeTube.rotation.z = Math.PI / 2;
-  activeTube.castShadow = true;
-  scene.add(activeTube);
-
-  const distractorTube = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.012, 0.012, 0.09, 24),
-    new THREE.MeshStandardMaterial({ color: activeColor === 0x22d3ee ? 0xfbbf24 : 0x22d3ee, roughness: 0.3 }),
-  );
-  distractorTube.position.set(0.18, 0.07, 0.13);
-  distractorTube.rotation.z = Math.PI / 2;
-  distractorTube.castShadow = true;
-  scene.add(distractorTube);
 
   const root = new THREE.Group();
   root.position.set(0, 0.06, 0);
@@ -195,10 +203,8 @@ function buildScene(mount: HTMLDivElement, task: string | undefined): TwinHandle
     const width = Math.max(mount.clientWidth, 1);
     const height = Math.max(mount.clientHeight, 1);
     const aspect = width / height;
-    const minViewWidth = 0.92;
-    const minViewHeight = 0.72;
-    const viewWidth = Math.max(minViewWidth, minViewHeight * aspect);
-    const viewHeight = Math.max(minViewHeight, minViewWidth / aspect);
+    const viewWidth = Math.max(MIN_VIEW_WIDTH, MIN_VIEW_HEIGHT * aspect);
+    const viewHeight = Math.max(MIN_VIEW_HEIGHT, MIN_VIEW_WIDTH / aspect);
 
     renderer.setSize(width, height, false);
     camera.left = -viewWidth / 2;
@@ -215,6 +221,7 @@ function buildScene(mount: HTMLDivElement, task: string | undefined): TwinHandle
     renderer,
     scene,
     camera,
+    controls,
     root,
     pan,
     shoulder,
@@ -223,13 +230,13 @@ function buildScene(mount: HTMLDivElement, task: string | undefined): TwinHandle
     wristRoll,
     leftFinger,
     rightFinger,
-    activeTube,
     frameId: 0,
     resizeObserver,
   };
 
   const animate = () => {
     handles.frameId = window.requestAnimationFrame(animate);
+    controls.update();
     renderer.render(scene, camera);
   };
   animate();
@@ -237,7 +244,7 @@ function buildScene(mount: HTMLDivElement, task: string | undefined): TwinHandle
   return handles;
 }
 
-function applyPose(handles: TwinHandles, joints: number[], task: string | undefined) {
+function applyPose(handles: TwinHandles, joints: number[]) {
   const pan = joints[0] ?? 0;
   const shoulder = joints[1] ?? -70;
   const elbow = joints[2] ?? 70;
@@ -255,11 +262,6 @@ function applyPose(handles: TwinHandles, joints: number[], task: string | undefi
   handles.leftFinger.position.z = opening;
   handles.rightFinger.position.z = -opening;
 
-  const activeColor = task?.toLowerCase().includes("yellow") ? 0xfbbf24 : 0x22d3ee;
-  const material = handles.activeTube.material;
-  if (material instanceof THREE.MeshStandardMaterial) {
-    material.color.setHex(activeColor);
-  }
 }
 
 export function DigitalTwinViewer({
@@ -279,7 +281,7 @@ export function DigitalTwinViewer({
     if (!mount) return;
     let handles: TwinHandles;
     try {
-      handles = buildScene(mount, task);
+      handles = buildScene(mount);
     } catch (err) {
       if (errorRef.current) {
         errorRef.current.textContent =
@@ -291,6 +293,7 @@ export function DigitalTwinViewer({
     return () => {
       window.cancelAnimationFrame(handles.frameId);
       handles.resizeObserver.disconnect();
+      handles.controls.dispose();
       handles.renderer.dispose();
       mount.replaceChildren();
       handlesRef.current = null;
@@ -300,8 +303,8 @@ export function DigitalTwinViewer({
   useEffect(() => {
     const handles = handlesRef.current;
     if (!handles) return;
-    applyPose(handles, pose, task);
-  }, [pose, task]);
+    applyPose(handles, pose);
+  }, [pose]);
 
   return (
     <section className="min-w-0">
@@ -313,6 +316,16 @@ export function DigitalTwinViewer({
       </div>
       <div className={`relative w-full overflow-hidden bg-slate-950 ${heightClassName}`}>
         <div ref={mountRef} className="absolute inset-0" />
+        <button
+          type="button"
+          onClick={() => {
+            const handles = handlesRef.current;
+            if (handles) resetCamera(handles.camera, handles.controls);
+          }}
+          className="absolute right-3 top-3 rounded-md border border-slate-700 bg-slate-950/85 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:text-slate-100"
+        >
+          Reset view
+        </button>
         <div
           ref={errorRef}
           className="absolute inset-0 flex items-center justify-center px-4 text-center text-sm text-slate-500 pointer-events-none"
