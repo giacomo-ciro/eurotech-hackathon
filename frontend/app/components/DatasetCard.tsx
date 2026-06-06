@@ -12,7 +12,7 @@ export function DatasetCard({ dataset }: { dataset: Dataset }) {
   const pill = STATUS_COLORS[dataset.augmentation_status] ?? STATUS_COLORS.raw;
   return (
     <Link
-      href={`/datasets/${dataset.id}`}
+      href={`/platform/datasets/${dataset.id}`}
       className="group rounded-xl bg-panel border border-slate-800 overflow-hidden hover:border-accent/60 transition flex flex-col"
     >
       <div className="aspect-video bg-slate-900 overflow-hidden">

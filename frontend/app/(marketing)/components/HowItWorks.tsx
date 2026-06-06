@@ -1,0 +1,54 @@
+const STEPS = [
+  {
+    n: "01",
+    title: "Record",
+    body:
+      "Capture a handful of teleoperation demos on the SO-101. Just the trajectories — no labels, no manual annotation.",
+  },
+  {
+    n: "02",
+    title: "Augment",
+    body:
+      "Claude reads the camera frames and generates dense, technical captions plus synthetic semantic variations. Your raw demos become hundreds of training episodes.",
+  },
+  {
+    n: "03",
+    title: "Train",
+    body:
+      "Fine-tune SmolVLA locally on Apple Silicon. Twenty minutes later, your model speaks your domain's vocabulary and runs on-device.",
+  },
+];
+
+export function HowItWorks() {
+  return (
+    <section className="relative">
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="mb-10 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            How it works
+          </h2>
+          <p className="mt-3 text-slate-400 max-w-2xl mx-auto">
+            A two-model pipeline that turns minimal raw demonstrations into
+            production-grade training data.
+          </p>
+        </div>
+        <ol className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {STEPS.map((step) => (
+            <li
+              key={step.n}
+              className="rounded-2xl bg-panel border border-slate-800 p-6 hover:border-accent/40 transition"
+            >
+              <div className="text-xs font-mono tracking-widest text-accent mb-3">
+                {step.n}
+              </div>
+              <h3 className="text-xl font-semibold tracking-tight">{step.title}</h3>
+              <p className="mt-3 text-sm text-slate-400 leading-relaxed">
+                {step.body}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
