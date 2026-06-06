@@ -59,10 +59,6 @@ export function datasetCoverUrl(id: string): string {
   return `${API_BASE}/api/datasets/${id}/cover`;
 }
 
-export function episodeVideoUrl(datasetId: string, episodeId: string): string {
-  return `${API_BASE}/api/datasets/${datasetId}/episodes/${episodeId}/video`;
-}
-
 export function captionStreamUrl(sessionId: string): string {
   return `${API_BASE}/api/sessions/${sessionId}/captions/stream`;
 }

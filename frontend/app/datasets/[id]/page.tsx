@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CaptionTrack } from "../../components/CaptionTrack";
-import { EpisodeList } from "../../components/EpisodeList";
+import { DigitalTwinViewer } from "../../components/DigitalTwinViewer";
 import { TimeseriesChart } from "../../components/TimeseriesChart";
-import { VideoReplay } from "../../components/VideoReplay";
+import { TrajectoryPlaybackControls } from "../../components/TrajectoryPlaybackControls";
 import { useEpisode } from "../../hooks/useEpisode";
-import { episodeVideoUrl, getDataset } from "../../lib/api";
+import { getDataset } from "../../lib/api";
 import type { DatasetDetail } from "../../lib/types";
 
 type Props = { params: { id: string } };
@@ -26,6 +26,11 @@ export default function DatasetDetailPage({ params }: Props) {
   const [currentTime, setCurrentTime] = useState(0);
 
   const { data: episode } = useEpisode(datasetId, episodeId);
+  const activeTrajectoryIndex = useMemo(() => {
+    if (!detail || !episodeId) return 0;
+    const index = detail.episodes.findIndex((ep) => ep.id === episodeId);
+    return index >= 0 ? index : 0;
+  }, [detail, episodeId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,6 +62,7 @@ export default function DatasetDetailPage({ params }: Props) {
   }
 
   const pill = STATUS_COLORS[detail.augmentation_status] ?? STATUS_COLORS.raw;
+  const runCountLabel = detail.id === "imported-lerobot" ? "Trajectories" : "Episodes";
 
   return (
     <main className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -76,7 +82,7 @@ export default function DatasetDetailPage({ params }: Props) {
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
             <span>Domain: <span className="text-slate-200">{detail.domain}</span></span>
             <span>Robot: <span className="text-slate-200">{detail.robot}</span></span>
-            <span>Episodes: <span className="text-slate-200">{detail.episode_count}</span></span>
+            <span>{runCountLabel}: <span className="text-slate-200">{detail.episode_count}</span></span>
             <span>Frames: <span className="text-slate-200">{detail.frame_count.toLocaleString()}</span></span>
             <span>Size: <span className="text-slate-200">{detail.size_mb.toFixed(1)} MB</span></span>
           </div>
@@ -89,39 +95,64 @@ export default function DatasetDetailPage({ params }: Props) {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-4">
-        <aside>
-          <h3 className="text-xs uppercase tracking-widest text-slate-400 mb-2">Episodes</h3>
-          <EpisodeList
-            episodes={detail.episodes}
-            activeId={episodeId}
-            onSelect={(id) => {
-              setEpisodeId(id);
-              setCurrentTime(0);
-            }}
-          />
-        </aside>
+      <section className="space-y-4 min-w-0">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-slate-500">Trajectory replay</p>
+            <h2 className="mt-1 text-lg font-semibold leading-tight">
+              Trajectory {String(activeTrajectoryIndex + 1).padStart(2, "0")}
+              {episode?.task ? <span className="text-slate-500"> · {episode.task}</span> : null}
+            </h2>
+          </div>
+          <label className="flex min-w-64 flex-col gap-1 text-xs uppercase tracking-widest text-slate-500">
+            Trajectory
+            <select
+              value={episodeId ?? ""}
+              onChange={(event) => {
+                setEpisodeId(event.target.value);
+                setCurrentTime(0);
+              }}
+              className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm normal-case tracking-normal text-slate-100 focus:border-accent focus:outline-none"
+            >
+              {detail.episodes.map((ep, index) => (
+                <option key={ep.id} value={ep.id}>
+                  {String(index + 1).padStart(2, "0")} · {ep.task || "unlabeled"} · {ep.frame_count} frames
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
 
-        <section className="space-y-4 min-w-0">
-          {!episode && episodeId && <p className="text-slate-500 text-sm">Loading episode…</p>}
-          {episode && (
-            <>
-              <div>
-                <p className="text-xs font-mono text-slate-500">{episode.id}</p>
-                <h2 className="text-lg font-semibold leading-tight">{episode.title}</h2>
-              </div>
-              <VideoReplay
-                src={episodeVideoUrl(datasetId, episode.id)}
-                onTimeUpdate={setCurrentTime}
+        {!episode && episodeId && <p className="text-slate-500 text-sm">Loading trajectory…</p>}
+        {episode && (
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-4 items-start">
+            <div className="space-y-4 min-w-0">
+              <DigitalTwinViewer
+                points={episode.timeseries}
+                currentTime={currentTime}
+                task={episode.task}
+                jointUnits={episode.joint_units}
+                heightClassName="h-[420px] md:h-[560px] xl:h-[680px]"
               />
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                <TimeseriesChart points={episode.timeseries} currentTime={currentTime} />
+              <TrajectoryPlaybackControls
+                points={episode.timeseries}
+                currentTime={currentTime}
+                onTimeChange={setCurrentTime}
+              />
+            </div>
+            <div className="space-y-4 min-w-0 xl:pt-7">
+              <TimeseriesChart
+                points={episode.timeseries}
+                currentTime={currentTime}
+                jointUnits={episode.joint_units}
+              />
+              {episode.captions.length > 0 && (
                 <CaptionTrack captions={episode.captions} currentTime={currentTime} />
-              </div>
-            </>
-          )}
-        </section>
-      </div>
+              )}
+            </div>
+          </div>
+        )}
+      </section>
     </main>
   );
 }
