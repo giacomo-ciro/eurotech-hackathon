@@ -1,8 +1,9 @@
 import type {
-  ActivePrescriptionDetail,
   ChatMessage,
-  Interaction,
-  Medicine,
+  Dataset,
+  DatasetDetail,
+  Episode,
+  Session,
 } from "./types";
 
 const API_BASE =
@@ -10,6 +11,10 @@ const API_BASE =
 
 export const RERUN_URL =
   process.env.NEXT_PUBLIC_RERUN_URL ?? "http://localhost:9090";
+
+export function apiUrl(path: string): string {
+  return `${API_BASE}${path}`;
+}
 
 async function getJSON<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
@@ -19,34 +24,56 @@ async function getJSON<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function getActivePrescription(): Promise<ActivePrescriptionDetail> {
-  return getJSON<ActivePrescriptionDetail>("/api/prescriptions/active");
+export function getActiveSession(): Promise<Session> {
+  return getJSON<Session>("/api/sessions/active");
 }
 
-export function getMedicine(drugId: number): Promise<Medicine> {
-  return getJSON<Medicine>(`/api/medicines/${drugId}`);
+export async function startRecording(sessionId: string): Promise<Session> {
+  const res = await fetch(`${API_BASE}/api/sessions/${sessionId}/start`, { method: "POST" });
+  if (!res.ok) throw new Error(`Start failed: ${res.status} ${await res.text()}`);
+  return res.json() as Promise<Session>;
 }
 
-export function getInteractions(drugId: number): Promise<Interaction[]> {
-  return getJSON<Interaction[]>(`/api/medicines/${drugId}/interactions`);
+export async function stopRecording(sessionId: string): Promise<Session> {
+  const res = await fetch(`${API_BASE}/api/sessions/${sessionId}/stop`, { method: "POST" });
+  if (!res.ok) throw new Error(`Stop failed: ${res.status} ${await res.text()}`);
+  return res.json() as Promise<Session>;
 }
 
-export async function startDispense(prescriptionId: string): Promise<void> {
-  const res = await fetch(
-    `${API_BASE}/api/prescriptions/${prescriptionId}/dispense`,
-    { method: "POST" },
-  );
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Dispense failed: ${res.status} ${detail}`);
-  }
+export function getDatasets(): Promise<Dataset[]> {
+  return getJSON<Dataset[]>("/api/datasets");
+}
+
+export function getDataset(id: string): Promise<DatasetDetail> {
+  return getJSON<DatasetDetail>(`/api/datasets/${id}`);
+}
+
+export function getEpisode(datasetId: string, episodeId: string): Promise<Episode> {
+  return getJSON<Episode>(`/api/datasets/${datasetId}/episodes/${episodeId}`);
+}
+
+export function datasetCoverUrl(id: string): string {
+  return `${API_BASE}/api/datasets/${id}/cover`;
+}
+
+export function episodeVideoUrl(datasetId: string, episodeId: string): string {
+  return `${API_BASE}/api/datasets/${datasetId}/episodes/${episodeId}/video`;
+}
+
+export function captionStreamUrl(sessionId: string): string {
+  return `${API_BASE}/api/sessions/${sessionId}/captions/stream`;
 }
 
 export function robotSocketUrl(): string {
-  const httpBase = API_BASE.replace(/\/$/, "");
-  const wsBase = httpBase.replace(/^http/, "ws");
+  const wsBase = API_BASE.replace(/^http/, "ws").replace(/\/$/, "");
   return `${wsBase}/ws/robot`;
 }
+
+export type ChatContext = {
+  session_id?: string;
+  dataset_id?: string;
+  episode_id?: string;
+};
 
 export type ChatStreamCallbacks = {
   onToken: (text: string) => void;
@@ -55,15 +82,15 @@ export type ChatStreamCallbacks = {
 };
 
 export async function streamChat(
-  drugId: number,
   messages: ChatMessage[],
+  context: ChatContext,
   callbacks: ChatStreamCallbacks,
   signal?: AbortSignal,
 ): Promise<void> {
   const res = await fetch(`${API_BASE}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ drug_id: drugId, messages }),
+    body: JSON.stringify({ messages, ...context }),
     signal,
   });
   if (!res.ok || !res.body) {

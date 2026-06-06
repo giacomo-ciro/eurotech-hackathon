@@ -12,7 +12,7 @@ from websockets.exceptions import ConnectionClosed
 from .. import config
 
 
-log = logging.getLogger("dispensr.robot_proxy")
+log = logging.getLogger("vla.robot_proxy")
 
 
 class RobotProxy:
@@ -85,8 +85,8 @@ class RobotProxy:
             await asyncio.sleep(backoff)
             backoff = min(backoff * 2, 10.0)
 
-    async def trigger_dispense(self, payload: dict[str, Any]) -> dict[str, Any]:
-        url = f"{config.ROBOT_BRIDGE_HTTP.rstrip('/')}/dispense"
+    async def trigger_record(self, payload: dict[str, Any]) -> dict[str, Any]:
+        url = f"{config.ROBOT_BRIDGE_HTTP.rstrip('/')}/record"
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.post(url, json=payload)
             response.raise_for_status()
