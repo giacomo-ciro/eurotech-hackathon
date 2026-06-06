@@ -1,49 +1,50 @@
 from __future__ import annotations
 
 import json
-from typing import AsyncIterator
+from typing import AsyncIterator, Optional
 
 from anthropic import AsyncAnthropic
 
 from .. import config
-from ..models.schemas import ChatMessage, Interaction, Medicine, Patient
+from ..models.schemas import ChatMessage, Dataset, Episode, Session
 
 
-_SYSTEM_TEMPLATE = """You are Dispensr's medication-information assistant for a pharmacist working at a small Hong Kong clinic.
+_SYSTEM_TEMPLATE = """You are the assistant for VLA-DataEngine, a synthetic-data engine that turns raw robot trajectories into dense, deployment-ready LeRobot datasets.
 
-You answer questions about ONE medicine: the one named below. Ground every answer in the structured record and interaction list provided. If a question cannot be answered from that data, say so plainly and recommend the pharmacist consult a clinician.
+Your role on this page: act as an automated data engineer for the operator. Help them think about the task, the trajectory they just recorded, and how the dataset will adapt downstream models (e.g. SmolVLA). Be specific and technical when relevant; concise when not.
 
-Safety rules:
-- Never give individualised clinical advice or change a dose.
-- Flag interactions that match the patient's other medications or allergies.
-- If asked something outside this medicine's scope, redirect to the pharmacist.
-- Match the user's language. Reply in 繁體中文 if the user writes in Chinese; otherwise English.
-- Keep answers under 6 sentences unless the user asks for more detail.
+Style:
+- Plain language unless the operator asks for a structured output.
+- 4 sentences max unless they ask for more.
+- Never invent data. If a fact isn't in the context blocks below, say so and ask what they want.
 
-=== Active medicine record ===
-{medicine_json}
+Context (only what is provided is in scope):
+=== Active session ===
+{session_json}
 
-=== Known interactions (from catalog) ===
-{interactions_json}
+=== Active dataset ===
+{dataset_json}
 
-=== Patient context ===
-{patient_json}
+=== Active episode ===
+{episode_json}
 """
 
 
+def _block(obj) -> str:
+    if obj is None:
+        return "null"
+    return json.dumps(obj.model_dump(), indent=2, ensure_ascii=False, default=list)
+
+
 def _build_system_block(
-    medicine: Medicine, interactions: list[Interaction], patient: Patient | None
+    session: Optional[Session],
+    dataset: Optional[Dataset],
+    episode: Optional[Episode],
 ) -> str:
     return _SYSTEM_TEMPLATE.format(
-        medicine_json=json.dumps(medicine.model_dump(), indent=2, ensure_ascii=False),
-        interactions_json=json.dumps(
-            [i.model_dump() for i in interactions], indent=2, ensure_ascii=False
-        ),
-        patient_json=(
-            json.dumps(patient.model_dump(), indent=2, ensure_ascii=False)
-            if patient
-            else "null"
-        ),
+        session_json=_block(session),
+        dataset_json=_block(dataset),
+        episode_json=_block(episode),
     )
 
 
@@ -55,20 +56,21 @@ class ClaudeClient:
         if self._client is None:
             if not config.ANTHROPIC_API_KEY:
                 raise RuntimeError(
-                    "ANTHROPIC_API_KEY is not set; chat endpoint cannot run."
+                    "ANTHROPIC_API_KEY is not set; Claude endpoints cannot run."
                 )
             self._client = AsyncAnthropic(api_key=config.ANTHROPIC_API_KEY)
         return self._client
 
-    async def stream_reply(
+    async def stream_chat(
         self,
         *,
-        medicine: Medicine,
-        interactions: list[Interaction],
-        patient: Patient | None,
+        session: Optional[Session],
+        dataset: Optional[Dataset],
+        episode: Optional[Episode],
         messages: list[ChatMessage],
+        max_tokens: int = 600,
     ) -> AsyncIterator[str]:
-        system_text = _build_system_block(medicine, interactions, patient)
+        system_text = _build_system_block(session, dataset, episode)
         api_messages = [
             {"role": m.role, "content": m.content} for m in messages if m.content.strip()
         ]
@@ -78,7 +80,7 @@ class ClaudeClient:
         client = self._client_or_raise()
         async with client.messages.stream(
             model=config.ANTHROPIC_MODEL,
-            max_tokens=600,
+            max_tokens=max_tokens,
             system=[
                 {
                     "type": "text",
@@ -90,6 +92,26 @@ class ClaudeClient:
         ) as stream:
             async for text in stream.text_stream:
                 yield text
+
+    async def one_shot(
+        self,
+        *,
+        session: Optional[Session],
+        dataset: Optional[Dataset],
+        episode: Optional[Episode],
+        user_prompt: str,
+        max_tokens: int = 220,
+    ) -> str:
+        chunks: list[str] = []
+        async for chunk in self.stream_chat(
+            session=session,
+            dataset=dataset,
+            episode=episode,
+            messages=[ChatMessage(role="user", content=user_prompt)],
+            max_tokens=max_tokens,
+        ):
+            chunks.append(chunk)
+        return "".join(chunks)
 
 
 _client = ClaudeClient()

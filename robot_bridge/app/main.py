@@ -7,20 +7,19 @@ from typing import Any
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
-from .lerobot_adapter import run_dispense
+from .lerobot_adapter import run_recording
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
-log = logging.getLogger("dispensr.robot_bridge")
+log = logging.getLogger("vla.robot_bridge")
 
-app = FastAPI(title="Dispensr Robot Bridge", version="0.1.0")
+app = FastAPI(title="VLA-DataEngine Robot Bridge", version="0.2.0")
 
 
-class DispenseRequest(BaseModel):
-    prescription_id: str
-    drug_id: int
-    drug_name: str
-    tray: str
+class RecordRequest(BaseModel):
+    session_id: str
+    task: str
+    robot: str
 
 
 class _Hub:
@@ -72,21 +71,21 @@ async def state_socket(socket: WebSocket) -> None:
         await _hub.unsubscribe(queue)
 
 
-@app.post("/dispense")
-async def dispense(request: DispenseRequest) -> dict[str, Any]:
+@app.post("/record")
+async def record(request: RecordRequest) -> dict[str, Any]:
     log.info(
-        "dispense requested: rx=%s drug=%s tray=%s",
-        request.prescription_id,
-        request.drug_name,
-        request.tray,
+        "record requested: session=%s task=%s robot=%s",
+        request.session_id,
+        request.task,
+        request.robot,
     )
 
     async def _drive() -> None:
-        async for event in run_dispense(request.model_dump()):
+        async for event in run_recording(request.model_dump()):
             await _hub.publish(event)
 
-    asyncio.create_task(_drive(), name=f"dispense-{request.prescription_id}")
-    return {"accepted": True, "prescription_id": request.prescription_id}
+    asyncio.create_task(_drive(), name=f"record-{request.session_id}")
+    return {"accepted": True, "session_id": request.session_id}
 
 
 if __name__ == "__main__":

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Nav } from "./components/Nav";
 
 export const metadata: Metadata = {
-  title: "Dispensr",
-  description: "AI pharmacy dispensing workcell",
+  title: "VLA-DataEngine",
+  description: "Bootstrap robot trajectories into deployment-ready LeRobot datasets",
 };
 
 export default function RootLayout({
@@ -13,8 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-ink text-slate-100 antialiased font-sans">
-        {children}
+      <body className="min-h-screen bg-ink text-slate-100 antialiased font-sans flex flex-col">
+        <Nav />
+        <div className="flex-1 flex flex-col min-h-0">{children}</div>
       </body>
     </html>
   );

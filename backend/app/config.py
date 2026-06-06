@@ -5,20 +5,15 @@ from pathlib import Path
 
 
 def _resolve_data_dir() -> Path:
-    override = os.environ.get("DISPENSR_DATA_DIR")
+    override = os.environ.get("VLA_DATA_DIR") or os.environ.get("DISPENSR_DATA_DIR")
     if override:
         return Path(override).resolve()
     return (Path(__file__).resolve().parents[2] / "data").resolve()
 
 
 DATA_DIR: Path = _resolve_data_dir()
-PRIMARY_CATALOG_CSV = DATA_DIR / "drug_data_1.csv"
-SECONDARY_CATALOG_CSV = DATA_DIR / "common_drugs.csv"
-COMMON_INTERACTIONS_CSV = DATA_DIR / "common_interactions.csv"
-INTERACTIONS_TEXT_CSV = DATA_DIR / "interactions_text.csv"
-PATIENTS_JSON = DATA_DIR / "patients.json"
-PRESCRIPTIONS_JSON = DATA_DIR / "prescriptions.json"
-ACTIVE_JSON = DATA_DIR / "active.json"
+DATASETS_DIR = DATA_DIR / "datasets"
+ACTIVE_SESSION_JSON = DATA_DIR / "active_session.json"
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")

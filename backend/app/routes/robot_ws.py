@@ -8,7 +8,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from ..services.robot_proxy import get_robot_proxy
 
 
-log = logging.getLogger("dispensr.robot_ws")
+log = logging.getLogger("vla.robot_ws")
 router = APIRouter()
 
 

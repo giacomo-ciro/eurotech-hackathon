@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import config
-from .routes import chat, medicines, patients, prescriptions, robot_ws
+from .routes import captions, chat, datasets, robot_ws, sessions
 from .services.data_store import get_store
 from .services.robot_proxy import get_robot_proxy
 
@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     await get_robot_proxy().stop()
 
 
-app = FastAPI(title="Dispensr Backend", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="VLA-DataEngine Backend", version="0.2.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,9 +33,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(patients.router)
-app.include_router(medicines.router)
-app.include_router(prescriptions.router)
+app.include_router(datasets.router)
+app.include_router(sessions.router)
+app.include_router(captions.router)
 app.include_router(chat.router)
 app.include_router(robot_ws.router)
 
