@@ -8,6 +8,8 @@ dependencies = [
 	"lerobot[aloha,pusht,feetech]",
 	"hydra-core",
 	"rerun-sdk>=0.26.2",
+	"transformers>=4.57.6",
+	"num2words>=0.5.14",
 ]
 
 [build-system]

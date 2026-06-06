@@ -89,3 +89,12 @@ def make_policy(cfg: DictConfig) -> Policy:
     policy = ACTPolicy() if cfg.deploy.policy_type == "act" else SmolVLAPolicy()
     policy.load(cfg.deploy.pretrained_path, cfg.deploy.device)
     return policy
+
+
+def make_policy_config(policy_type: str):
+    from lerobot.policies.act.configuration_act import ACTConfig
+    from lerobot.policies.smolvla.configuration_smolvla import SmolVLAConfig
+
+    if policy_type.lower() == "smolvla":
+        return SmolVLAConfig(push_to_hub=False)
+    return ACTConfig(push_to_hub=False)
