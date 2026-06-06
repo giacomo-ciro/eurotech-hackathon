@@ -32,7 +32,7 @@ export function SessionCard({ session }: Props) {
           <dt className="text-slate-500">Target dataset</dt>
           <dd>
             <Link
-              href={`/datasets/${session.dataset_id}`}
+              href={`/platform/datasets/${session.dataset_id}`}
               className="text-accent hover:underline"
             >
               {session.dataset_id}

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DatasetGrid } from "../components/DatasetGrid";
-import { getDatasets } from "../lib/api";
-import type { Dataset } from "../lib/types";
+import { DatasetGrid } from "../../../components/DatasetGrid";
+import { getDatasets } from "../../../lib/api";
+import type { Dataset } from "../../../lib/types";
 
 export default function DatasetsPage() {
   const [datasets, setDatasets] = useState<Dataset[] | null>(null);
