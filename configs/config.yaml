@@ -1,0 +1,32 @@
+defaults:
+  - _self_
+  - user: gciro
+
+robot:
+  cam_width: 640
+  cam_height: 480
+  fps: 25
+
+dataset:
+  repo_id: giacomo-ciro/cube-color-pointing
+  root: data/dataset
+  tasks:
+    - "pick up the cube"
+  num_episodes: 10
+  push_to_hub: false
+  overwrite: true
+
+train:
+  steps: 10000
+  batch_size: 8
+  save_freq: 2000
+  log_freq: 100
+  output_dir: outputs/train/act
+
+deploy:
+  pretrained_path: checkpoints/pretrained_model
+  device: mps
+  policy_type: act        # "act" or "smolvla"
+  tasks:
+    - "pick up the cube"
+  n_steps: 500            # control steps per episode before policy.reset()
