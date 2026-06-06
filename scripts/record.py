@@ -36,7 +36,7 @@ def main(cfg):
                     push_to_hub=cfg.dataset.push_to_hub,
                 ),
                 display_data=True,
-                resume=not cfg.dataset.overwrite and Path(cfg.dataset.root).exists(),
+                resume=not cfg.dataset.overwrite and (Path(cfg.dataset.root) / "meta" / "tasks.parquet").exists(),
             )
         )
 
