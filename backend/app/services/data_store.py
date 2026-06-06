@@ -120,6 +120,8 @@ class DataStore:
         return DatasetDetail(**dataset.model_dump(), episodes=episodes)
 
     def episode(self, dataset_id: str, episode_id: str) -> Optional[Episode]:
+        if dataset_id not in self._datasets or episode_id not in self._episode_ids.get(dataset_id, []):
+            return None
         dataset_dir = config.DATASETS_DIR / dataset_id
         summary = _load_episode_metadata(dataset_dir, episode_id)
         if summary is None:
