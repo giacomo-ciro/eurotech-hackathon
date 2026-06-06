@@ -134,6 +134,8 @@ class DataStore:
         )
 
     def episode_video_path(self, dataset_id: str, episode_id: str) -> Optional[Path]:
+        if dataset_id not in self._datasets or episode_id not in self._episode_ids.get(dataset_id, []):
+            return None
         path = config.DATASETS_DIR / dataset_id / "episodes" / episode_id / "video.mp4"
         if not path.exists():
             return None
