@@ -272,14 +272,15 @@ function RecordedView({
       const t = el.currentTime;
       if (episodeData) {
         if (t >= episodeData.video_to_s) {
+          // Always clamp to the episode slice end so we never play beyond it while
+          // waiting for the next episode to load.
+          el.pause();
+          el.currentTime = episodeData.video_to_s;
+          onPlaybackTime(episodeData.video_to_s - episodeData.video_from_s);
           if (autoplay) {
             if (advancingRef.current) return;
             advancingRef.current = true;
             onNext();
-          } else {
-            el.pause();
-            el.currentTime = episodeData.video_to_s;
-            onPlaybackTime(episodeData.video_to_s - episodeData.video_from_s);
           }
           return;
         }
