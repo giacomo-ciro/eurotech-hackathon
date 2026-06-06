@@ -6,6 +6,9 @@ robot:
   cam_width: 640   # camera resolution in pixels
   cam_height: 480
   fps: 25          # capture/control loop frequency
+  cam2_index: null
+  cam2_width: 640
+  cam2_height: 360
 
 dataset:
   repo_id: giacomo-ciro/cube-color-pointing   # HuggingFace dataset id

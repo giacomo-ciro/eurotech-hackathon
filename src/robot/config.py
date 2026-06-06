@@ -12,7 +12,7 @@ def make_robot_config(cfg) -> SOFollowerRobotConfig:
             fps=cfg.robot.fps,
         )
     }
-    if hasattr(cfg.robot, "cam2_index") and cfg.robot.cam2_index is not None:
+    if cfg.robot.cam2_index is not None:
         cameras["camera2"] = OpenCVCameraConfig(
             index_or_path=cfg.robot.cam2_index,
             width=cfg.robot.cam2_width,
