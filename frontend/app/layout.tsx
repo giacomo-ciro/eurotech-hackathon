@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "VLA-DataEngine",
-  description: "Bootstrap robot trajectories into deployment-ready LeRobot datasets",
+  description:
+    "Hong Kong robotics data engine for turning SO-101 demos into factory-ready VLA datasets",
 };
 
 export default function RootLayout({

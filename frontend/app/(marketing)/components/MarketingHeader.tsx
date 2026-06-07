@@ -7,7 +7,7 @@ export function MarketingHeader() {
         <Link href="/" className="flex items-center gap-3">
           <span className="text-lg font-bold tracking-tight">VLA-DataEngine</span>
           <span className="hidden md:inline text-xs uppercase tracking-widest text-slate-500">
-            Synthetic data for physical AI
+            Hong Kong to factory floor
           </span>
         </Link>
         <Link

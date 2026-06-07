@@ -1,21 +1,21 @@
 const STEPS = [
   {
     n: "01",
-    title: "Record",
+    title: "Record in Hong Kong",
     body:
-      "Capture a handful of teleoperation demos on the SO-101. Just the trajectories — no labels, no manual annotation.",
+      "Capture a handful of teleoperation demos on the SO-101. Just the trajectories from the workflow you need to bring into production.",
   },
   {
     n: "02",
-    title: "Augment",
+    title: "Augment with domain language",
     body:
-      "Claude reads the camera frames and generates dense, technical captions plus synthetic semantic variations. Your raw demos become hundreds of training episodes.",
+      "Claude reads the camera frames and generates dense technical captions plus semantic variations for manufacturing, lab, logistics, or QA tasks.",
   },
   {
     n: "03",
-    title: "Train",
+    title: "Deploy near the factory floor",
     body:
-      "Fine-tune SmolVLA locally on Apple Silicon. Twenty minutes later, your model speaks your domain's vocabulary and runs on-device.",
+      "Fine-tune SmolVLA locally, validate on the arm, and carry the adapted policy into the Hong Kong-Shenzhen hardware iteration loop.",
   },
 ];
 
@@ -28,8 +28,9 @@ export function HowItWorks() {
             How it works
           </h2>
           <p className="mt-3 text-slate-400 max-w-2xl mx-auto">
-            A two-model pipeline that turns minimal raw demonstrations into
-            production-grade training data.
+            A two-model pipeline for turning local robot demos into training
+            data that can travel from a Hong Kong lab to Asian manufacturing
+            partners.
           </p>
         </div>
         <ol className="grid grid-cols-1 md:grid-cols-3 gap-4">
