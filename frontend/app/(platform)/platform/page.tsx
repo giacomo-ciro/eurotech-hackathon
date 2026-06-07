@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CaptionStream } from "./components/CaptionStream";
-import { EpisodeDataPanel } from "./components/EpisodeDataPanel";
-import { RecordingControls } from "./components/RecordingControls";
-import { SessionCard } from "./components/SessionCard";
-import { useActiveSession } from "./hooks/useActiveSession";
-import { useLeRobotEpisode, useLeRobotIndex } from "./hooks/useLeRobotEpisode";
-import { useRobotState } from "./hooks/useRobotState";
-import { startRecording, stopRecording } from "./lib/api";
-import type { VideoMode } from "./lib/types";
+import { CaptionStream } from "../../components/CaptionStream";
+import { EpisodeDataPanel } from "../../components/EpisodeDataPanel";
+import { RecordingControls } from "../../components/RecordingControls";
+import { SessionCard } from "../../components/SessionCard";
+import { useActiveSession } from "../../hooks/useActiveSession";
+import { useLeRobotEpisode, useLeRobotIndex } from "../../hooks/useLeRobotEpisode";
+import { useRobotState } from "../../hooks/useRobotState";
+import { startRecording, stopRecording } from "../../lib/api";
+import type { VideoMode } from "../../lib/types";
 
 export default function CollectionPage() {
   const { data: session, error } = useActiveSession();

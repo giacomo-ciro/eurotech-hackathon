@@ -66,10 +66,6 @@ export default function DatasetDetailPage({ params }: Props) {
 
   return (
     <main className="flex-1 overflow-y-auto p-6 space-y-4">
-      <div className="text-xs text-slate-500">
-        <Link href="/datasets" className="hover:text-accent">← Marketplace</Link>
-      </div>
-
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-3xl">
           <div className="flex items-center gap-3">
