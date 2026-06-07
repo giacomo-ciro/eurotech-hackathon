@@ -15,6 +15,44 @@ Three processes:
 
 Frontend + backend are containerized. `robot_bridge` runs on the host because Docker Desktop on macOS can't reach USB cleanly. The backend reaches the host via `host.docker.internal:8001`.
 
+## Demo clips
+
+<table>
+  <tr>
+    <th>Correct blue pick</th>
+    <th>Incorrect red pick</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="demo_clips/blue_ext.gif" alt="External view of the correct blue cube pick" width="260"><br>
+      <sub>External view</sub>
+    </td>
+    <td align="center">
+      <img src="demo_clips/red_ext.gif" alt="External view of the incorrect red cube pick" width="260"><br>
+      <sub>External view</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="demo_clips/blue_pov.gif" alt="First-person view of the correct blue cube pick" width="260"><br>
+      <sub>First-person view</sub>
+    </td>
+    <td align="center">
+      <img src="demo_clips/red_pov.gif" alt="First-person view of the incorrect red run" width="260"><br>
+      <sub>First-person view</sub>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <sub>Timed caption tracks:
+    <a href="demo_clips/blue_ext.vtt">blue_ext.vtt</a> ·
+    <a href="demo_clips/blue_pov.vtt">blue_pov.vtt</a> ·
+    <a href="demo_clips/red_ext.vtt">red_ext.vtt</a> ·
+    <a href="demo_clips/red_pov.vtt">red_pov.vtt</a>
+  </sub>
+</p>
+
 ## Data layout
 
 ```
