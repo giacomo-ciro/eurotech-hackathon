@@ -55,7 +55,7 @@ Every shortcut. **Anything listed here = free.**
 | Hugging Face LeRobot (`lerobot` Python package) | Recording (`lerobot.scripts.lerobot_record.record`), training (`lerobot.scripts.lerobot_train.train`), policy loading (`lerobot.policies.factory.make_pre_post_processors`). Also the LeRobot v3 dataset format read by `lerobot_store.py`. | Real library calls. No HF Hub uploads during the demo (`dataset.push_to_hub: false` in `configs/config.yaml`). | None for local use; HF token only needed if pushing to Hub. |
 | Rerun (`rerun-sdk` Python + `@rerun-io/web-viewer` JS, both 0.26.x) | Backend logs joint Transform3D + workspace geometry into an in-memory `.rrd` byte stream; frontend embeds the web viewer to render it with native 3D controls. | Real, fully local — no rerun.io cloud call. | None. |
 | HuggingFace Hub (`giacomo-ciro/cube-color-pointing` — referenced in `configs/config.yaml` as default `dataset.repo_id`) | Default upload destination for the LeRobot recorder when `push_to_hub: true`. | Mocked off (`push_to_hub: false`). No data was pushed during the hackathon. | HF token required only if turned on. |
-| SO-101 leader + follower arms (real hardware) | Teleoperation, recording, replay. The 41 episodes in `data/` came from this. | Real, used during data collection. Not present in the web demo runtime — see §3 mock. | USB serial ports configured per-operator in `configs/user/*.yaml`. |
+| SO-101 leader + follower arms (real hardware) | Teleoperation, recording, replay. The 103 episodes in `data/` came from this. | Real, used during data collection. Not present in the web demo runtime — see §3 mock. | USB serial ports configured per-operator in `configs/user/*.yaml`. |
 | Docker Hub / npm registry | Container base images + JS deps. | Real (build-time only). | None. |
 
 ---
@@ -66,13 +66,11 @@ Anything written **before** the hackathon kickoff that we brought into this proj
 | Item | Source (URL or description) | Roughly how much | License |
 |---|---|---|---|
 | EuroTech LeRobot tutorial: `README.robotum.md`, the hardware-setup chapters | Upstream tutorial provided by the EuroTech × HK Talent Engage Hackathon organisers | 1 file (~24 KB), reference only — we did not modify the tutorial text itself. | As provided by the organisers. |
-| LeRobot SO-101 boilerplate scripts (`scripts/record.py`, `scripts/teleoperate.py`, `scripts/train.py`, `scripts/replay.py`, `scripts/deploy.py`, `scripts/save_pose.py`) + `configs/config.yaml` + `src/robot/` wrappers | Patterned after the LeRobot tutorial / SO-100 community starter code distributed for the hackathon. The Hydra config layout and the `lerobot.scripts.*` invocation pattern are not original to us. | ~7 short Python files (most ≤50 LOC) wrapping `lerobot` API calls. We extended these with `src/robot/policy.py` and the `--user` override mechanism. | Apache-2.0 (LeRobot). |
 | `dump/so101.urdf` | Public SO-101 URDF from the SO-100 / LeRobot community. | One URDF file. | As published upstream. |
-| `demo/rerun_demo.py` | Adapted from the Rerun "animated URDF" example. | ~150 LOC reference script. We did not import it into the production web path; it lives in `demo/` as a standalone reproduction of the technique. | Apache-2.0 (Rerun examples). |
 | `frontend/` Next.js 14 + Tailwind app shell | Started from `npx create-next-app@14` boilerplate (App Router, TypeScript, Tailwind). All page logic, components, hooks, and API client code under `frontend/app/` were written during the hackathon. | Boilerplate scaffolding only. | MIT (Next.js boilerplate). |
 | Framework dependencies (libraries we *use* but did not author): Next.js, React, FastAPI, Uvicorn, Anthropic SDK, LeRobot, Hugging Face datasets / transformers stack, Rerun (Python SDK + Web Viewer), Tailwind, Three.js (now retired from the trajectory replay path). | Public npm / PyPI. | Listed in `frontend/package.json` and `backend/pyproject.toml` / `pyproject.toml`. | Respective OSS licenses. |
 
-Everything not listed above — every file under `backend/app/`, `frontend/app/`, `robot_bridge/app/`, the docs in the repo root, the recorded dataset, the docker-compose plumbing — was written during the hackathon window (first commit `2026-06-06 11:17:31 +0200`).
+Everything not listed above — every file under `backend/app/`, `frontend/app/`, `robot_bridge/app/`, the docs in the repo root, the recorded dataset, the docker-compose plumbing and the robot-related code in `src/` — was written during the hackathon window (first commit `2026-06-06 11:17:31 +0200` initialized the repo).
 
 ---
 
@@ -84,4 +82,4 @@ Everything not listed above — every file under `backend/app/`, `frontend/app/`
 - **No safety gate.** Per `ACT_IMPLEMENTATION.md`, a real product needs joint-delta limits, workspace bounds, an emergency stop, and an action whitelist between any policy output and `robot.send_action`. None of that is implemented yet — it's why we mocked the recording path rather than wire half a safety story.
 - **Marketplace UX is single-dataset.** The `/datasets` grid is built for many datasets but only the imported LeRobot one is real. The price / status / search filters work against static manifest values; there is no checkout flow.
 - **AV1 wrist-cam video does not play in Safari.** A Chrome/Firefox/Edge limitation we accepted; the rest of the trajectory page still works in Safari because the Rerun viewer renders independently of the video element.
-- **The dataset in `data/` is gitignored.** Reviewers cloning the repo won't have the 41 episodes; we'd ship a small sample shard alongside the repo for reproducibility, or document a recording flow they can run themselves.
+- **The dataset in `data/` is gitignored.** Reviewers cloning the repo won't have the 103 episodes.
