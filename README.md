@@ -1,8 +1,12 @@
-# VLA-DataEngine
+# Synthetic VLA Data Engine
 
 ![image](/presentation_assets/image.png)
 
 A synthetic-data engine that turns a handful of raw robot trajectories into dense, deployment-ready LeRobot datasets — plus a marketplace for selling them.
+
+> TL;DR: Starting from a seed dataset, a VLM autonomously labels the episodes and trajectories, which are then leveraged to improve the robot. This loop is iterated for continuous improvement.
+
+
 
 See `PITCH.md` and `DEMO_SCRIPT.md` for the business framing, and `HONESTY.md` for a full disclosure of what works and what is just a demo.
 
