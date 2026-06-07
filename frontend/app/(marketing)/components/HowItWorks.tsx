@@ -1,21 +1,21 @@
 const STEPS = [
   {
     n: "01",
-    title: "Record in Hong Kong",
+    title: "Capture the skill",
     body:
-      "Capture a handful of teleoperation demos on the SO-101. Just the trajectories from the workflow you need to bring into production.",
+      "Start with a concrete physical task: grasp household objects, sort parts, stage parcels, or handle lab equipment. We record the robot demonstrations and raw trajectories.",
   },
   {
     n: "02",
-    title: "Augment with domain language",
+    title: "Generate training signal",
     body:
-      "Claude reads the camera frames and generates dense technical captions plus semantic variations for manufacturing, lab, logistics, or QA tasks.",
+      "The platform adds semantic labels, task descriptions, trajectory metadata, and replayable evidence so the data explains what the robot did and why it matters.",
   },
   {
     n: "03",
-    title: "Deploy near the factory floor",
+    title: "Package for model teams",
     body:
-      "Fine-tune SmolVLA locally, validate on the arm, and carry the adapted policy into the Hong Kong-Shenzhen hardware iteration loop.",
+      "Ship model-ready datasets for LeRobot and Rerun inspection, ready for edge VLA adaptation, evaluation, and reuse across related robot workflows.",
   },
 ];
 
@@ -28,9 +28,8 @@ export function HowItWorks() {
             How it works
           </h2>
           <p className="mt-3 text-slate-400 max-w-2xl mx-auto">
-            A two-model pipeline for turning local robot demos into training
-            data that can travel from a Hong Kong lab to Asian manufacturing
-            partners.
+            A practical pipeline for turning local physical tasks into reusable
+            robot training data.
           </p>
         </div>
         <ol className="grid grid-cols-1 md:grid-cols-3 gap-4">

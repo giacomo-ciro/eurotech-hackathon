@@ -1,18 +1,18 @@
 const REASONS = [
   {
-    title: "Gateway to Shenzhen",
+    title: "Close to real physical workflows",
     body:
-      "Prototype in Hong Kong, iterate with nearby manufacturing partners, and keep the model-training loop close to the hardware.",
+      "The region around Hong Kong creates endless robot tasks: grasping, sorting, packing, inspection, logistics, lab handling, and service automation.",
   },
   {
-    title: "Made for specialized workflows",
+    title: "Strong AI sector",
     body:
-      "Manufacturing QA, lab handling, warehouse sorting, and robotics OEM demos all depend on vocabulary that generic VLAs do not understand out of the box.",
+      "Hong Kong has the AI talent and research base to turn those real-world tasks into usable datasets, model-adaptation pipelines, and deployable robotics systems.",
   },
   {
-    title: "Local edge deployment",
+    title: "Bridge from task to dataset",
     body:
-      "Generate semantic training data with Claude, fine-tune SmolVLA locally, and run the adapted policy on affordable robot hardware.",
+      "VLA-DataEngine sits between local operators with physical tasks and AI teams that need clean, validated robot data.",
   },
 ];
 
@@ -28,12 +28,11 @@ export function WhyHongKong() {
             Why Hong Kong
           </h2>
           <p className="mt-5 text-base leading-relaxed text-slate-300 md:text-lg">
-            Robotics companies do not only need models. They need hardware
-            iteration, supplier access, manufacturing partners, and a credible
-            market entry point. Hong Kong sits at that intersection: close
-            enough to Shenzhen for rapid hardware iteration, connected enough
-            for international commercialization, and dense enough for robotics,
-            logistics, lab automation, and advanced manufacturing pilots.
+            Hong Kong is uniquely positioned for physical-AI data generation:
+            it sits next to a massive manufacturing ecosystem while also having
+            a strong AI sector of its own. That makes it a practical bridge
+            between real physical workflows and the AI systems that need local
+            training data.
           </p>
         </div>
 

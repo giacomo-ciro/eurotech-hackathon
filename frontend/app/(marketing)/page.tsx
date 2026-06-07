@@ -1,5 +1,6 @@
 import { Hero } from "./components/Hero";
 import { HowItWorks } from "./components/HowItWorks";
+import { UseCases } from "./components/UseCases";
 import { WhyHongKong } from "./components/WhyHongKong";
 
 export default function LandingPage() {
@@ -7,6 +8,7 @@ export default function LandingPage() {
     <>
       <Hero />
       <WhyHongKong />
+      <UseCases />
       <HowItWorks />
     </>
   );
