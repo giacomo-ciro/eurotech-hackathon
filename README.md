@@ -1,5 +1,7 @@
 # VLA-DataEngine
 
+![image](/presentation_assets/image.png)
+
 Synthetic-data engine that turns a handful of raw robot trajectories into dense, deployment-ready LeRobot datasets — and a marketplace for selling them. See `PITCH.md` and `DEMO_SCRIPT.md` for the business framing.
 
 ## Architecture

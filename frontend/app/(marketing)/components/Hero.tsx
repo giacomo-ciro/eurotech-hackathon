@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const PROOF_POINTS = [
-  "Hong Kong base",
-  "Shenzhen supply chain",
-  "Local VLA fine-tuning",
+  "Robot demonstrations",
+  "Semantic labels",
+  "Model-ready datasets",
 ];
 
 export function Hero() {
@@ -25,18 +25,16 @@ export function Hero() {
       <div className="relative mx-auto grid min-h-[calc(100vh-57px)] max-w-6xl grid-cols-1 items-center px-6 py-20 md:grid-cols-[1.05fr_0.95fr] md:py-28">
         <div className="max-w-3xl">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.24em] text-accent">
-            Built in Hong Kong for the robotics supply chain next door
+            A data foundry for physical AI
           </p>
           <h1 className="mt-5 text-4xl font-bold leading-[0.98] tracking-tight md:text-6xl lg:text-7xl">
-            Turn Hong Kong robot demos into{" "}
-            <span className="text-accent">factory-ready physical AI.</span>
+            We generate the missing data for{" "}
+            <span className="text-accent">physical AI.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-200 md:text-xl">
-            VLA-DataEngine uses Claude to transform a handful of SO-101
-            demonstrations into rich LeRobot datasets, then fine-tunes compact
-            VLA models for local deployment. Hong Kong gives teams a launchpad:
-            global capital, technical talent, and direct proximity to Shenzhen's
-            manufacturing ecosystem.
+            Bring us a real-world robot task. We record demonstrations, enrich
+            them with semantic labels, validate the trajectories, and ship
+            model-ready datasets for LeRobot, Rerun, and edge VLA training.
           </p>
           <div className="mt-7 flex flex-wrap gap-2">
             {PROOF_POINTS.map((point) => (
@@ -57,8 +55,8 @@ export function Hero() {
               <span aria-hidden>→</span>
             </Link>
             <p className="text-sm text-slate-300">
-              From lab bench to production floor, without waiting months for
-              labeled robotics data.
+              Built in Hong Kong, close to a massive manufacturing ecosystem
+              and backed by a strong local AI sector.
             </p>
           </div>
         </div>
