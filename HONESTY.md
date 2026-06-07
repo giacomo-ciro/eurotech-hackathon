@@ -11,10 +11,12 @@ Judges compare this against `git shortlog -sn`, so keep it honest.
 
 | Member | GitHub handle | Main contributions |
 |---|---|---|
-| Giacomo Ciro | [@giacomo-ciro](https://github.com/giacomo-ciro) | SO-101 hardware setup (with Vittorio), motor calibration, leader/follower teleoperation, the LeRobot recording pipeline that produced the 41-episode dataset under `data/`, the LeRobot training/replay/deploy scripts (`scripts/{record,train,replay,deploy,teleoperate,save_pose}.py`), and the `src/robot/` policy/config wrappers around LeRobot. |
-| Vittorio Rossi | [@VittorioRossi](https://github.com/VittorioRossi) | Business idea development, market and competitive research (`COMPANIES.md`, `RISK_ANALYSIS.md`), pitch deck and `PITCH.md` framing, ACT/SmolVLA feasibility writeup (`ACT_IMPLEMENTATION.md`), and SO-101 hardware setup (with Giacomo). |
-| Alex Caldarone | [@alexcaldarone](https://github.com/alexcaldarone) | Most of the web app: Next.js frontend (`frontend/app/`, pages, components, hooks, lib), the FastAPI backend (`backend/app/`) — datasets/sessions/captions/chat/robot WS routes, `data_store`, Claude integration with prompt caching (`claude_client.py`), the rolling caption engine (`caption_engine.py`), robot-bridge proxy fan-out, and the `robot_bridge/` host process that emits scripted recording-stage events. Docker compose plumbing. |
-| Davide Beltrame | [@davide-beltrame](https://github.com/davide-beltrame) | Imported SO-101 trajectories into the web app: the LeRobot v3 store + `/api/lerobot/*` routes (`backend/app/services/lerobot_store.py`, `backend/app/routes/lerobot.py`), the trajectory replay UI (`TimeseriesChart`, `TrajectoryPlaybackControls`, episode hooks), and the Rerun digital-twin viewer (`backend/app/services/rerun_export.py` + `frontend/app/components/RerunTwinViewer.tsx`) that replaced an earlier hand-built three.js scene. Also helped with recordings, calibration, and business ideas. Prepared scripts for business video and demo. |
+| Giacomo Cirò | [@giacomo-ciro](https://github.com/giacomo-ciro) | SO-101 hardware setup and maintenance: motor calibration, training/replay/deploy/record/teleoperation scripts. |
+| Vittorio Rossi | [@VittorioRossi](https://github.com/VittorioRossi) | Business idea development, market and competitive research, pitch deck and pitch framing, ACT/SmolVLA feasibility writeup, dual-camera setup and SO-101 policty distributed training. |
+| Alex Caldarone | [@alexcaldarone](https://github.com/alexcaldarone) | Most of the web app: Next.js frontend, the FastAPI backend — datasets/sessions/captions/chat/robot WS routes, Claude integration with prompt caching, the rolling caption engine, and the robot bridge. Docker compose plumbing. |
+| Davide Beltrame | [@davide-beltrame](https://github.com/davide-beltrame) | Imported SO-101 trajectories into the web app: the LeRobot v3 store, the trajectory replay UI, and the Rerun digital-twin viewer that replaced an earlier hand-built three.js scene. Also helped with recordings, calibration, and business ideas. Prepared scripts for business video and demo. |
+
+All 4 team members contributed equally to teleoperating the arm and produce the 103 episodes.
 
 `copilot-swe-agent[bot]` commits in `git shortlog` are GitHub Copilot PR-fix commits, not separate contributors.
 
