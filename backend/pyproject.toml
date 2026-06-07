@@ -13,4 +13,5 @@ dependencies = [
     "pandas>=2.2",
     "pyarrow>=16",
     "python-multipart>=0.0.9",
+    "rerun-sdk~=0.26.0",
 ]

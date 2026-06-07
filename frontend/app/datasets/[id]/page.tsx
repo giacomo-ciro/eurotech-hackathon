@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { CaptionTrack } from "../../components/CaptionTrack";
-import { DigitalTwinViewer } from "../../components/DigitalTwinViewer";
-import { TimeseriesChart } from "../../components/TimeseriesChart";
-import { TrajectoryPlaybackControls } from "../../components/TrajectoryPlaybackControls";
-import { useEpisode } from "../../hooks/useEpisode";
-import { getDataset } from "../../lib/api";
-import type { DatasetDetail } from "../../lib/types";
+import { CaptionTrack } from "../../../../components/CaptionTrack";
+import { RerunTwinViewer } from "../../../../components/RerunTwinViewer";
+import { TimeseriesChart } from "../../../../components/TimeseriesChart";
+import { TrajectoryPlaybackControls } from "../../../../components/TrajectoryPlaybackControls";
+import { useEpisode } from "../../../../hooks/useEpisode";
+import { episodeRrdUrl, getDataset } from "../../../../lib/api";
+import type { DatasetDetail } from "../../../../lib/types";
 
 type Props = { params: { id: string } };
 
@@ -127,9 +127,10 @@ export default function DatasetDetailPage({ params }: Props) {
         {episode && (
           <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-4 items-start">
             <div className="space-y-4 min-w-0">
-              <DigitalTwinViewer
-                points={episode.timeseries}
+              <RerunTwinViewer
+                rrdUrl={episodeRrdUrl(datasetId, episode.id)}
                 currentTime={currentTime}
+                onTimeChange={setCurrentTime}
                 task={episode.task}
                 jointUnits={episode.joint_units}
                 heightClassName="h-[420px] md:h-[560px] xl:h-[680px]"

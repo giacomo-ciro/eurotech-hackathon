@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse, Response
 
 from ..models.schemas import Dataset, DatasetDetail, Episode
 from ..services.data_store import get_store
+from ..services.rerun_export import export_episode_rrd
 
 
 router = APIRouter(prefix="/api/datasets", tags=["datasets"])
@@ -58,6 +59,27 @@ def get_episode(dataset_id: str, episode_id: str) -> Episode:
     if episode is None:
         raise HTTPException(status_code=404, detail=f"Episode {episode_id} not found")
     return episode
+
+
+@router.get("/{dataset_id}/episodes/{episode_id}/rrd")
+def get_episode_rrd(dataset_id: str, episode_id: str) -> Response:
+    return _episode_rrd_response(dataset_id, episode_id)
+
+
+@router.get("/{dataset_id}/episodes/{episode_id}/trajectory.rrd")
+def get_episode_rrd_file(dataset_id: str, episode_id: str) -> Response:
+    return _episode_rrd_response(dataset_id, episode_id)
+
+
+def _episode_rrd_response(dataset_id: str, episode_id: str) -> Response:
+    episode = get_store().episode(dataset_id, episode_id)
+    if episode is None:
+        raise HTTPException(status_code=404, detail=f"Episode {episode_id} not found")
+    return Response(
+        content=export_episode_rrd(episode),
+        media_type="application/vnd.rerun.rrd",
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @router.get("/{dataset_id}/episodes/{episode_id}/video")
