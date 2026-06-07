@@ -55,6 +55,10 @@ export function getEpisode(datasetId: string, episodeId: string): Promise<Episod
   return getJSON<Episode>(`/api/datasets/${datasetId}/episodes/${episodeId}`);
 }
 
+export function episodeRrdUrl(datasetId: string, episodeId: string): string {
+  return `${API_BASE}/api/datasets/${datasetId}/episodes/${episodeId}/trajectory.rrd`;
+}
+
 export function datasetCoverUrl(id: string): string {
   return `${API_BASE}/api/datasets/${id}/cover`;
 }

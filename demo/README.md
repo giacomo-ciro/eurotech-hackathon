@@ -8,5 +8,5 @@ To run:
 ```
 uv pip install -r requirements.txt
 rerun &     # server in the background
-pyhton demo/rerun_demo.py
+python demo/rerun_demo.py
 ```

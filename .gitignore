@@ -226,3 +226,6 @@ __marimo__/
 
 .DS_Store
 !frontend/app/lib/
+frontend/.next/
+frontend/node_modules/
+frontend/tsconfig.tsbuildinfo
