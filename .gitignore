@@ -229,3 +229,12 @@ __marimo__/
 frontend/.next/
 frontend/node_modules/
 frontend/tsconfig.tsbuildinfo
+
+# Rerun recording dumps (we stream .rrd in-memory; any on-disk copies are local debug)
+*.rrd
+
+# IDE / editor metadata
+.idea/
+.vscode/
+.cursor/
+*.swp
