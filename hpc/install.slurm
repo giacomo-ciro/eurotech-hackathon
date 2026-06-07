@@ -1,35 +1,38 @@
 #!/bin/bash
 #SBATCH --job-name=lerobot_install
-#SBATCH --partition=gpu              # adjust to your cluster's partition name
+#SBATCH --partition=medium_gpunew
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
+#SBATCH --gres=gpu:H100:1
 #SBATCH --time=00:30:00
 #SBATCH --output=lerobot_install_%j.out
 #SBATCH --error=lerobot_install_%j.err
 
-LEROBOT_SRC="$HOME/lerobot-src"
-CONDA_ENV="lerobot"
+CONDA="/software/miniconda3/bin/conda"
+ENV_PREFIX="$HOME/.conda/envs/lerobot2"
 
-source "$(conda info --base)/etc/profile.d/conda.sh"
+echo "=== CUDA driver ==="
+nvidia-smi | head -4
 
-# create env if it doesn't exist
-if ! conda env list | grep -q "^${CONDA_ENV} "; then
-  conda create -y -n "$CONDA_ENV" python=3.12
-fi
+# Create fresh env in user home
+$CONDA create -y -p $ENV_PREFIX python=3.11
 
-conda activate "$CONDA_ENV"
+PYTHON="$ENV_PREFIX/bin/python"
+PIP="$ENV_PREFIX/bin/pip"
 
-# clone if not already done
-if [[ ! -d "$LEROBOT_SRC/.git" ]]; then
-  git clone https://github.com/huggingface/lerobot.git "$LEROBOT_SRC"
-else
-  git -C "$LEROBOT_SRC" pull --ff-only
-fi
+# H100 supports up to CUDA 12.x; pytorch-cuda=12.4 is the latest PyTorch supports
+$CONDA install -y -p $ENV_PREFIX \
+  pytorch torchvision torchaudio \
+  pytorch-cuda=12.4 \
+  -c pytorch -c nvidia
 
-pip install -e "$LEROBOT_SRC[feetech,smolvla,dataset]"
+# Install lerobot on top
+$PIP install 'lerobot[smolvla,feetech]'
 
-echo "Verify:"
-lerobot-train --help | head -3
+echo "=== Verify ==="
+$PYTHON -c "import torch; print('torch', torch.__version__); print('cuda:', torch.cuda.is_available())"
+$PYTHON -c "import lerobot; print('lerobot ok')"
+echo "PYTHON path: $PYTHON"
 echo "Done."

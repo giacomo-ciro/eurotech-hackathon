@@ -30,6 +30,9 @@ fi
 echo "Installing lerobot with feetech and smolvla extras …"
 conda run -n "$CONDA_ENV" pip install -e "$LEROBOT_SRC[feetech,smolvla,dataset]"
 
+echo "Installing local robot package …"
+conda run -n "$CONDA_ENV" pip install -e "$LEROBOT_DIR"
+
 # ── 4. Verify ─────────────────────────────────────────────────────────────────
 echo ""
 echo "Verifying installation …"

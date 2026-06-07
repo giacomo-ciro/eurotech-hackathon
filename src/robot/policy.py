@@ -58,8 +58,12 @@ class ACTPolicy(Policy):
         state = torch.tensor(
             [raw_obs[f"{j}.pos"] for j in JOINT_NAMES], dtype=torch.float32
         ).unsqueeze(0)
-        img = torch.from_numpy(raw_obs["wrist_cam"]).permute(2, 0, 1).float().unsqueeze(0) / 255.0
-        return {"observation.images.wrist_cam": img, "observation.state": state}
+        batch = {"observation.state": state}
+        for cam_key in ("wrist_cam", "camera2"):
+            if cam_key in raw_obs:
+                img = torch.from_numpy(raw_obs[cam_key]).permute(2, 0, 1).float().unsqueeze(0) / 255.0
+                batch[f"observation.images.{cam_key}"] = img
+        return batch
 
 
 class SmolVLAPolicy(Policy):
@@ -91,10 +95,10 @@ def make_policy(cfg: DictConfig) -> Policy:
     return policy
 
 
-def make_policy_config(policy_type: str):
+def make_policy_config(policy_type: str, device: str = "cpu"):
     from lerobot.policies.act.configuration_act import ACTConfig
     from lerobot.policies.smolvla.configuration_smolvla import SmolVLAConfig
 
     if policy_type.lower() == "smolvla":
-        return SmolVLAConfig(push_to_hub=False)
-    return ACTConfig(push_to_hub=False)
+        return SmolVLAConfig(push_to_hub=False, device=device)
+    return ACTConfig(push_to_hub=False, device=device)

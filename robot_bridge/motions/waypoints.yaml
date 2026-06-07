@@ -1,0 +1,26 @@
+default:
+  stages:
+    - name: scanning
+      detail: Capturing package + label
+      duration_s: 1.5
+    - name: identified
+      detail: Confidence 0.91 - match confirmed
+      duration_s: 1.0
+    - name: picking
+      detail: Approaching shelf and grasping box
+      duration_s: 2.5
+    - name: placed
+      detail: Releasing into tray
+      duration_s: 1.5
+    - name: done
+      detail: Ready for pharmacist confirmation
+      duration_s: 0.5
+
+# When the real SO-101 is wired in, replace the stages above with recorded
+# trajectories or fixed joint targets per tray. Keys are referenced by
+# robot_bridge/app/lerobot_adapter.py.
+trays:
+  morning: { x: 0.18, y: 0.12, z: 0.06 }
+  lunch:   { x: 0.18, y: 0.04, z: 0.06 }
+  dinner:  { x: 0.18, y: -0.04, z: 0.06 }
+  review:  { x: 0.18, y: -0.12, z: 0.06 }
