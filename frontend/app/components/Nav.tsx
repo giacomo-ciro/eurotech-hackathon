@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const TABS = [
   { href: "/platform", label: "Collection" },
-  { href: "/platform/datasets", label: "Datasets" },
+  { href: "/platform/datasets", label: "Digital Twin" },
 ];
 
 export function Nav() {

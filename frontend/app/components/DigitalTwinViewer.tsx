@@ -26,6 +26,8 @@ type TwinHandles = {
   wristRoll: THREE.Group;
   leftFinger: THREE.Mesh;
   rightFinger: THREE.Mesh;
+  modelRoot: THREE.Group;
+  mount: HTMLDivElement;
   frameId: number;
   resizeObserver: ResizeObserver;
 };
@@ -36,10 +38,10 @@ const LINK_LENGTHS = {
   wrist: 0.1,
   tool: 0.07,
 };
-const VIEW_TARGET = new THREE.Vector3(0.18, 0.09, 0);
 const CAMERA_OFFSET = new THREE.Vector3(0.62, 0.42, 0.66);
 const MIN_VIEW_WIDTH = 0.86;
 const MIN_VIEW_HEIGHT = 0.58;
+const FRAME_PADDING = 1.28;
 
 function degToRad(value: number): number {
   return (value * Math.PI) / 180;
@@ -103,12 +105,48 @@ function addLink(parent: THREE.Group, length: number, color: number): THREE.Grou
   return next;
 }
 
-function resetCamera(camera: THREE.OrthographicCamera, controls: OrbitControls) {
-  camera.position.copy(VIEW_TARGET).add(CAMERA_OFFSET);
+function resetCamera(
+  camera: THREE.OrthographicCamera,
+  controls: OrbitControls,
+  modelRoot: THREE.Object3D,
+) {
+  const bounds = new THREE.Box3().setFromObject(modelRoot);
+  const target = new THREE.Vector3();
+  bounds.getCenter(target);
+
+  camera.position.copy(target).add(CAMERA_OFFSET);
   camera.zoom = 1;
-  camera.lookAt(VIEW_TARGET);
-  controls.target.copy(VIEW_TARGET);
+  camera.lookAt(target);
+  controls.target.copy(target);
   controls.update();
+}
+
+function fitCameraToModel(
+  camera: THREE.OrthographicCamera,
+  controls: OrbitControls,
+  modelRoot: THREE.Object3D,
+  mount: HTMLDivElement,
+  renderer: THREE.WebGLRenderer,
+) {
+  const width = Math.max(mount.clientWidth, 1);
+  const height = Math.max(mount.clientHeight, 1);
+  const aspect = width / height;
+  const bounds = new THREE.Box3().setFromObject(modelRoot);
+  const size = new THREE.Vector3();
+  bounds.getSize(size);
+
+  const modelWidth = Math.max(size.x, size.z) * FRAME_PADDING;
+  const modelHeight = Math.max(size.y + size.z * 0.45, size.x * 0.55) * FRAME_PADDING;
+  const viewWidth = Math.max(MIN_VIEW_WIDTH, modelWidth, modelHeight * aspect);
+  const viewHeight = Math.max(MIN_VIEW_HEIGHT, modelHeight, modelWidth / aspect);
+
+  renderer.setSize(width, height, false);
+  camera.left = -viewWidth / 2;
+  camera.right = viewWidth / 2;
+  camera.top = viewHeight / 2;
+  camera.bottom = -viewHeight / 2;
+  camera.updateProjectionMatrix();
+  resetCamera(camera, controls, modelRoot);
 }
 
 function buildScene(mount: HTMLDivElement): TwinHandles {
@@ -146,7 +184,8 @@ function buildScene(mount: HTMLDivElement): TwinHandles {
   controls.addEventListener("end", () => {
     renderer.domElement.style.cursor = "grab";
   });
-  resetCamera(camera, controls);
+  const modelRoot = new THREE.Group();
+  scene.add(modelRoot);
 
   const ambient = new THREE.AmbientLight(0xffffff, 0.58);
   scene.add(ambient);
@@ -158,7 +197,7 @@ function buildScene(mount: HTMLDivElement): TwinHandles {
 
   const table = makeBox([0.72, 0.024, 0.46], 0x111827, [0.12, -0.014, 0]);
   table.receiveShadow = true;
-  scene.add(table);
+  modelRoot.add(table);
 
   const base = new THREE.Mesh(
     new THREE.CylinderGeometry(0.055, 0.072, 0.055, 40),
@@ -167,11 +206,11 @@ function buildScene(mount: HTMLDivElement): TwinHandles {
   base.position.set(0, 0.028, 0);
   base.castShadow = true;
   base.receiveShadow = true;
-  scene.add(base);
+  modelRoot.add(base);
 
   const root = new THREE.Group();
   root.position.set(0, 0.06, 0);
-  scene.add(root);
+  modelRoot.add(root);
 
   const pan = new THREE.Group();
   root.add(pan);
@@ -200,18 +239,7 @@ function buildScene(mount: HTMLDivElement): TwinHandles {
   gripperRoot.add(leftFinger, rightFinger);
 
   const resize = () => {
-    const width = Math.max(mount.clientWidth, 1);
-    const height = Math.max(mount.clientHeight, 1);
-    const aspect = width / height;
-    const viewWidth = Math.max(MIN_VIEW_WIDTH, MIN_VIEW_HEIGHT * aspect);
-    const viewHeight = Math.max(MIN_VIEW_HEIGHT, MIN_VIEW_WIDTH / aspect);
-
-    renderer.setSize(width, height, false);
-    camera.left = -viewWidth / 2;
-    camera.right = viewWidth / 2;
-    camera.top = viewHeight / 2;
-    camera.bottom = -viewHeight / 2;
-    camera.updateProjectionMatrix();
+    fitCameraToModel(camera, controls, modelRoot, mount, renderer);
   };
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(mount);
@@ -230,6 +258,8 @@ function buildScene(mount: HTMLDivElement): TwinHandles {
     wristRoll,
     leftFinger,
     rightFinger,
+    modelRoot,
+    mount,
     frameId: 0,
     resizeObserver,
   };
@@ -290,6 +320,8 @@ export function DigitalTwinViewer({
       return;
     }
     handlesRef.current = handles;
+    applyPose(handles, pose);
+    fitCameraToModel(handles.camera, handles.controls, handles.modelRoot, handles.mount, handles.renderer);
     return () => {
       window.cancelAnimationFrame(handles.frameId);
       handles.resizeObserver.disconnect();
@@ -306,6 +338,13 @@ export function DigitalTwinViewer({
     applyPose(handles, pose);
   }, [pose]);
 
+  useEffect(() => {
+    const handles = handlesRef.current;
+    if (!handles || points.length === 0) return;
+    applyPose(handles, interpolatePose(points, currentTime));
+    fitCameraToModel(handles.camera, handles.controls, handles.modelRoot, handles.mount, handles.renderer);
+  }, [points]);
+
   return (
     <section className="min-w-0">
       <div className="flex items-center justify-between mb-2">
@@ -320,7 +359,7 @@ export function DigitalTwinViewer({
           type="button"
           onClick={() => {
             const handles = handlesRef.current;
-            if (handles) resetCamera(handles.camera, handles.controls);
+            if (handles) resetCamera(handles.camera, handles.controls, handles.modelRoot);
           }}
           className="absolute right-3 top-3 rounded-md border border-slate-700 bg-slate-950/85 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:text-slate-100"
         >
