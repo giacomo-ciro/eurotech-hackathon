@@ -1,83 +1,67 @@
-# Synthetic VLA Data Engine
+# EuroTech x HKTE Hackathon: SO-101 Robotic Arm
 
-![image](/presentation_assets/image.png)
+This is our repo for the [EuroTech x HKTE Hackathon](https://www.hkengage.gov.hk/en/events/eurotech-x-hkte-hackathon): a playground for the SO-101 robotic arm where we teleoperated, collected data, and trained policies. We also developed a prototype platform born from the failures we ran into along the way.
 
-A synthetic-data engine that turns a handful of raw robot trajectories into dense, deployment-ready LeRobot datasets — plus a marketplace for selling them.
-
-> TL;DR: Starting from a seed dataset, a VLM autonomously labels the episodes and trajectories, which are then leveraged to improve the robot. This loop is iterated for continuous improvement.
-
-
-
-See `PITCH.md` and `DEMO_SCRIPT.md` for the business framing, and `HONESTY.md` for a full disclosure of what works and what is just a demo.
-
-## Demo clips
+We recorded the SO-101 picking up a cube by teleoperating ~100 episodes, then trained [ACT](https://github.com/tonyzhaozh/act) and [SmolVLA](https://huggingfingface.co/blog/smolvla) on the data. Both policies failed, below we elaborate on why. Those struggles felt universal enough to robotics teams that we also prototyped a startup concept around them: a platform for automatic data labeling (business logic and platform only, not a working pipeline, see [`archive/`](archive/)).
 
 <table>
   <tr>
-    <th>Correct blue pick</th>
-    <th>Incorrect red pick</th>
+    <th width="50%" align="center"><div align="center">Blue cube pick</div></th>
+    <th width="50%" align="center"><div align="center">Red cube pick</div></th>
   </tr>
   <tr>
     <td align="center">
-      <img src="demo_clips/blue_ext.gif" alt="External view of the correct blue cube pick" width="260"><br>
-      <sub>External view</sub>
+      <img src="public/blue_ext.gif" alt="External view of the blue cube pick" width="320"><br><sub>External&nbsp;camera</sub>
+      <br><br>
+      <img src="public/blue_pov.gif" alt="First-person view of the blue cube pick" width="320"><br><sub>Wrist-mounted&nbsp;camera</sub>
     </td>
     <td align="center">
-      <img src="demo_clips/red_ext.gif" alt="External view of the incorrect red cube pick" width="260"><br>
-      <sub>External view</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="demo_clips/blue_pov.gif" alt="First-person view of the correct blue cube pick" width="260"><br>
-      <sub>First-person view</sub>
-    </td>
-    <td align="center">
-      <img src="demo_clips/red_pov.gif" alt="First-person view of the incorrect red run" width="260"><br>
-      <sub>First-person view</sub>
+      <img src="public/red_ext.gif" alt="External view of the red cube pick" width="320"><br><sub>External&nbsp;camera</sub>
+      <br><br>
+      <img src="public/red_pov.gif" alt="First-person view of the red cube pick" width="320"><br><sub>Wrist-mounted&nbsp;camera</sub>
     </td>
   </tr>
 </table>
 
-<p align="center">
-  <sub>Timed caption tracks:
-    <a href="demo_clips/blue_ext.vtt">blue_ext.vtt</a> ·
-    <a href="demo_clips/blue_pov.vtt">blue_pov.vtt</a> ·
-    <a href="demo_clips/red_ext.vtt">red_ext.vtt</a> ·
-    <a href="demo_clips/red_pov.vtt">red_pov.vtt</a>
-  </sub>
-</p>
+*Actions performed in these demos are teleoperated.*
 
-## Run
+## What we learned
 
-Prereqs: Docker Desktop, [`uv`](https://docs.astral.sh/uv/), an Anthropic API key.
+Over 24 hours with the SO-101, we tried a lot and failed a lot. The key lessons:
+- **Data collection is everything.** The policy is only as good as the demonstrations, and "enough" good demonstrations is a much higher bar than it looks.
+- **Consistency of setup matters more than volume.** We recorded ~100 episodes at 4 a.m., then trained and deployed in the morning at 10 a.m. The lighting had completely changed — shadows on the camera POV were different enough to throw the policy off. Same arm, same task, same data... different light, different result.
+- **"Simple" tasks aren't simple.** We started with sorting pills by shape and color. Too ambitious. We scaled down to sorting colored boxes. Still too hard. We scaled down to just picking up a box. Still too hard. We scaled down to pointing at a box. Still hard. Each step down revealed how much is actually happening in what looks like a trivial motion.
 
+## Usage
+
+Sync the environment:
 ```bash
-cp .env.example .env       # paste ANTHROPIC_API_KEY into .env
-uv pip install -e robot_bridge
+uv sync
 ```
 
-Terminal 1 — host-side robot bridge:
+Find the USB port for each arm, then calibrate it (see the [SO-101 docs](https://huggingface.co/docs/lerobot/so101) for the full hardware setup):
 ```bash
-uv run python -m robot_bridge.app.main
+lerobot-find-port # follow instructions to detect the port
+
+lerobot-calibrate \
+    --robot.type=so101_follower \
+    --robot.port=/dev/tty.usbmodem58760431551 \ # replace with your port
+    --robot.id=Follower
+
+lerobot-calibrate \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/tty.usbmodem58760431551 \  # replace with your port
+    --teleop.id=Leader
 ```
 
-Terminal 2 — backend + frontend:
+The following scripts read directly from [configs/config.yaml](configs/config.yaml), update it accordingly.
+
 ```bash
-docker compose up --build
+uv run python scripts/teleoperate.py  # use the leader arm to control the follower arm live
+uv run python scripts/record.py       # record teleoperation episodes into a dataset
+uv run python scripts/replay.py       # replay a recorded episode on the robot
+uv run python scripts/train.py        # train an ACT policy on the recorded dataset
+uv run python scripts/deploy.py       # run a trained policy on the robot
 ```
 
-Open <http://localhost:3000>.
-
-## Architecture
-
-Three processes:
-
-- **`frontend`** — Next.js 14 + Tailwind on `:3000`. Three pages:
-  - **`/`** Collection. Left = robot live stream (rerun iframe) + 4-stage recording timeline + Start/Stop. Right = active-session card + auto-caption stream from Claude + free-form chat scoped to the session.
-  - **`/datasets`** Marketplace. Grid of dataset cards with domain / status / search filters.
-  - **`/datasets/[id]`** Detail. Episode list + video replay + scrubber-synced joint timeseries chart + frame-caption track.
-- **`backend`** — FastAPI on `:8000`. Loads `data/datasets/*/manifest.json` and episode metadata at startup; serves REST for datasets/sessions/episodes, SSE `/api/chat` (Claude with prompt caching, grounded on session / dataset / episode context), SSE `/api/sessions/{id}/captions/stream` (rolling Claude captions driven by `services/caption_engine.py`), WS `/ws/robot` fan-out.
-- **`robot_bridge`** — FastAPI on `:8001`, **host process** (needs USB → SO-101). WS `/ws` publishes recording stage events; `POST /record` triggers a scripted mock motion (`motions/recording_stages.yaml`: `arming → recording → captioning → saved → idle`) so the Collection page animates end-to-end without the arm plugged in.
-
-Frontend + backend are containerized. `robot_bridge` runs on the host because Docker Desktop on macOS can't reach USB cleanly. The backend reaches the host via `host.docker.internal:8001`.
+See [`archive/LEROBOT.md`](archive/LEROBOT.md) for more commands (saving poses, overwriting datasets, switching user configs).

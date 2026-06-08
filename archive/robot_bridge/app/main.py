@@ -1,0 +1,94 @@
+from __future__ import annotations
+
+import asyncio
+import logging
+from typing import Any
+
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
+
+from .lerobot_adapter import run_recording
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+log = logging.getLogger("vla.robot_bridge")
+
+app = FastAPI(title="VLA-DataEngine Robot Bridge", version="0.2.0")
+
+
+class RecordRequest(BaseModel):
+    session_id: str
+    task: str
+    robot: str
+
+
+class _Hub:
+    def __init__(self) -> None:
+        self._subscribers: set[asyncio.Queue[dict[str, Any]]] = set()
+        self._lock = asyncio.Lock()
+        self._last: dict[str, Any] = {"stage": "idle", "detail": "robot-bridge online"}
+
+    async def subscribe(self, queue: asyncio.Queue[dict[str, Any]]) -> None:
+        async with self._lock:
+            self._subscribers.add(queue)
+        await queue.put(self._last)
+
+    async def unsubscribe(self, queue: asyncio.Queue[dict[str, Any]]) -> None:
+        async with self._lock:
+            self._subscribers.discard(queue)
+
+    async def publish(self, event: dict[str, Any]) -> None:
+        self._last = event
+        async with self._lock:
+            queues = list(self._subscribers)
+        for queue in queues:
+            try:
+                queue.put_nowait(event)
+            except asyncio.QueueFull:
+                pass
+
+
+_hub = _Hub()
+
+
+@app.get("/healthz")
+def healthz() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+@app.websocket("/ws")
+async def state_socket(socket: WebSocket) -> None:
+    await socket.accept()
+    queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=32)
+    await _hub.subscribe(queue)
+    try:
+        while True:
+            event = await queue.get()
+            await socket.send_json(event)
+    except WebSocketDisconnect:
+        return
+    finally:
+        await _hub.unsubscribe(queue)
+
+
+@app.post("/record")
+async def record(request: RecordRequest) -> dict[str, Any]:
+    log.info(
+        "record requested: session=%s task=%s robot=%s",
+        request.session_id,
+        request.task,
+        request.robot,
+    )
+
+    async def _drive() -> None:
+        async for event in run_recording(request.model_dump()):
+            await _hub.publish(event)
+
+    asyncio.create_task(_drive(), name=f"record-{request.session_id}")
+    return {"accepted": True, "session_id": request.session_id}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8001)

@@ -55,4 +55,4 @@ For multi-step tasks, state a brief plan:
 
 ### 5. Environment
 
-We use `uv` as package manager. 
+We use `uv` as package manager. Never `uv pip install` new packages, always `uv add` for reproducibility.
