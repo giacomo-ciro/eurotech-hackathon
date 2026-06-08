@@ -1,5 +1,11 @@
 # EuroTech x HKTE Hackathon: SO-101 Robotic Arm
 
+<div align="center">
+
+[Davide Beltrame](https://davidebeltrame.com) · [Alex John Caldarone](https://www.linkedin.com/in/alexjohncaldarone/) · [Giacomo Cirò](https://giacomociro.com) · [Vittorio Rossi](https://vittoriorossi.com)
+
+</div>
+
 This is our repo for the [EuroTech x HKTE Hackathon](https://www.hkengage.gov.hk/en/events/eurotech-x-hkte-hackathon): a playground for the SO-101 robotic arm where we teleoperated, collected data, and trained policies. We also developed a prototype platform born from the failures we ran into along the way.
 
 We recorded the SO-101 picking up a cube by teleoperating ~100 episodes, then trained [ACT](https://github.com/tonyzhaozh/act) and [SmolVLA](https://huggingfingface.co/blog/smolvla) on the data. Both policies failed, below we elaborate on why. Those struggles felt universal enough to robotics teams that we also prototyped a startup concept around them: a platform for automatic data labeling (business logic and platform only, not a working pipeline, see [`archive/`](archive/)).
